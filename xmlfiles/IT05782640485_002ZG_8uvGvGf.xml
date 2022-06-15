@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet  type="text/xsl" href="fatturaordinaria_v1.2.1.xsl"?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12">
+	<FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>08245660017</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>921581</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario>USAL8PV</CodiceDestinatario>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>05782640485</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>05782640485</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>STUDIO LA ROSA E ASSOCIATI</Denominazione>
+				</Anagrafica>
+				<RegimeFiscale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA VITTORIO EMANUELE II, 117</Indirizzo>
+				<CAP>50134</CAP>
+				<Comune>FIRENZE</Comune>
+				<Provincia>FI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+			<Contatti>
+				<Telefono>055486791</Telefono>
+				<Fax>055499842</Fax>
+				<Email>info@studiolarosaeassociati.it</Email>
+			</Contatti>
+		</CedentePrestatore>
+		<CessionarioCommittente>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>05275720489</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>05275720489</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>C.B.C. GALVANICA SRL</Denominazione>
+				</Anagrafica>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA DELLA TORRICELLA 165/167</Indirizzo>
+				<CAP>50013</CAP>
+				<Comune>CAMPI BISENZIO</Comune>
+				<Provincia>FI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CessionarioCommittente>
+	</FatturaElettronicaHeader>
+	<FatturaElettronicaBody>
+		<DatiGenerali>
+			<DatiGeneraliDocumento>
+				<TipoDocumento>TD06</TipoDocumento>
+				<Divisa>EUR</Divisa>
+				<Data>2022-05-01</Data>
+				<Numero>172</Numero>
+				<DatiRitenuta>
+					<TipoRitenuta>RT01</TipoRitenuta>
+					<ImportoRitenuta>103.62</ImportoRitenuta>
+					<AliquotaRitenuta>20.00</AliquotaRitenuta>
+					<CausalePagamento>A</CausalePagamento>
+				</DatiRitenuta>
+				<DatiCassaPrevidenziale>
+					<TipoCassa>TC08</TipoCassa>
+					<AlCassa>4.00</AlCassa>
+					<ImportoContributoCassa>20.72</ImportoContributoCassa>
+					<ImponibileCassa>518.10</ImponibileCassa>
+					<AliquotaIVA>22.00</AliquotaIVA>
+				</DatiCassaPrevidenziale>
+				<ImportoTotaleDocumento>657.36</ImportoTotaleDocumento>
+				<Causale>Fattura di vendita</Causale>
+			</DatiGeneraliDocumento>
+		</DatiGenerali>
+		<DatiBeniServizi>
+			<DettaglioLinee>
+				<NumeroLinea>1</NumeroLinea>
+				<CodiceArticolo>
+					<CodiceTipo>Servizio</CodiceTipo>
+					<CodiceValore>CONT_O</CodiceValore>
+				</CodiceArticolo>
+				<Descrizione>Tenuta contabilità - Fatturazione Aprile 2022</Descrizione>
+				<DataInizioPeriodo>2022-04-01</DataInizioPeriodo>
+				<DataFinePeriodo>2022-04-30</DataFinePeriodo>
+				<PrezzoUnitario>300.00</PrezzoUnitario>
+				<PrezzoTotale>300.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<Ritenuta>SI</Ritenuta>
+			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>2</NumeroLinea>
+				<CodiceArticolo>
+					<CodiceTipo>Servizio</CodiceTipo>
+					<CodiceValore>F24</CodiceValore>
+				</CodiceArticolo>
+				<Descrizione>Modello F24 - Fatturazione Aprile</Descrizione>
+				<Quantita>1.00000000</Quantita>
+				<UnitaMisura>Num.</UnitaMisura>
+				<DataInizioPeriodo>2022-04-01</DataInizioPeriodo>
+				<DataFinePeriodo>2022-04-30</DataFinePeriodo>
+				<PrezzoUnitario>11.00</PrezzoUnitario>
+				<PrezzoTotale>11.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<Ritenuta>SI</Ritenuta>
+			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>3</NumeroLinea>
+				<CodiceArticolo>
+					<CodiceTipo>Servizio</CodiceTipo>
+					<CodiceValore>M_IVA</CodiceValore>
+				</CodiceArticolo>
+				<Descrizione>Redazione Modello IVA - Fatturazione Anno 2021</Descrizione>
+				<DataInizioPeriodo>2021-01-01</DataInizioPeriodo>
+				<DataFinePeriodo>2021-12-31</DataFinePeriodo>
+				<PrezzoUnitario>160.00</PrezzoUnitario>
+				<PrezzoTotale>160.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<Ritenuta>SI</Ritenuta>
+			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>4</NumeroLinea>
+				<TipoCessionePrestazione>AC</TipoCessionePrestazione>
+				<CodiceArticolo>
+					<CodiceTipo>Maggiorazione onorari</CodiceTipo>
+					<CodiceValore>SPESE</CodiceValore>
+				</CodiceArticolo>
+				<Descrizione>Magg. Onorari</Descrizione>
+				<PrezzoUnitario>47.10</PrezzoUnitario>
+				<PrezzoTotale>47.10</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<Ritenuta>SI</Ritenuta>
+			</DettaglioLinee>
+			<DatiRiepilogo>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<ImponibileImporto>538.82</ImponibileImporto>
+				<Imposta>118.54</Imposta>
+				<EsigibilitaIVA>I</EsigibilitaIVA>
+				<RiferimentoNormativo>22% - GENERICO</RiferimentoNormativo>
+			</DatiRiepilogo>
+		</DatiBeniServizi>
+		<DatiPagamento>
+			<CondizioniPagamento>TP02</CondizioniPagamento>
+			<DettaglioPagamento>
+				<ModalitaPagamento>MP12</ModalitaPagamento>
+				<DataRiferimentoTerminiPagamento>2022-05-01</DataRiferimentoTerminiPagamento>
+				<GiorniTerminiPagamento>30</GiorniTerminiPagamento>
+				<DataScadenzaPagamento>2022-05-31</DataScadenzaPagamento>
+				<ImportoPagamento>553.74</ImportoPagamento>
+			</DettaglioPagamento>
+		</DatiPagamento>
+	</FatturaElettronicaBody>
+</p:FatturaElettronica>
+

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet  type="text/xsl" href="fatturaordinaria_v1.2.1.xsl"?>
+<p:FatturaElettronica xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" versione="FPR12">
+	<FatturaElettronicaHeader>
+		<DatiTrasmissione>
+			<IdTrasmittente>
+				<IdPaese>IT</IdPaese>
+				<IdCodice>08245660017</IdCodice>
+			</IdTrasmittente>
+			<ProgressivoInvio>918591</ProgressivoInvio>
+			<FormatoTrasmissione>FPR12</FormatoTrasmissione>
+			<CodiceDestinatario>USAL8PV</CodiceDestinatario>
+		</DatiTrasmissione>
+		<CedentePrestatore>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>05782640485</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>05782640485</CodiceFiscale>
+				<Anagrafica>
+					<Denominazione>STUDIO LA ROSA E ASSOCIATI</Denominazione>
+				</Anagrafica>
+				<RegimeFiscale>RF01</RegimeFiscale>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA VITTORIO EMANUELE II, 117</Indirizzo>
+				<CAP>50134</CAP>
+				<Comune>FIRENZE</Comune>
+				<Provincia>FI</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+			<Contatti>
+				<Telefono>055486791</Telefono>
+				<Fax>055499842</Fax>
+				<Email>info@studiolarosaeassociati.it</Email>
+			</Contatti>
+		</CedentePrestatore>
+		<CessionarioCommittente>
+			<DatiAnagrafici>
+				<IdFiscaleIVA>
+					<IdPaese>IT</IdPaese>
+					<IdCodice>02268640519</IdCodice>
+				</IdFiscaleIVA>
+				<CodiceFiscale>PTTSMN64T62D612X</CodiceFiscale>
+				<Anagrafica>
+					<Nome>SIMONA</Nome>
+					<Cognome>PIATTI</Cognome>
+				</Anagrafica>
+			</DatiAnagrafici>
+			<Sede>
+				<Indirizzo>VIA LUNGARNO DON MINZONI N° 16/A</Indirizzo>
+				<CAP>52027</CAP>
+				<Comune>SAN GIOVANNI VALDARNO</Comune>
+				<Provincia>AR</Provincia>
+				<Nazione>IT</Nazione>
+			</Sede>
+		</CessionarioCommittente>
+	</FatturaElettronicaHeader>
+	<FatturaElettronicaBody>
+		<DatiGenerali>
+			<DatiGeneraliDocumento>
+				<TipoDocumento>TD06</TipoDocumento>
+				<Divisa>EUR</Divisa>
+				<Data>2022-04-26</Data>
+				<Numero>160</Numero>
+				<DatiCassaPrevidenziale>
+					<TipoCassa>TC08</TipoCassa>
+					<AlCassa>4.00</AlCassa>
+					<ImportoContributoCassa>2.00</ImportoContributoCassa>
+					<ImponibileCassa>50.00</ImponibileCassa>
+					<AliquotaIVA>22.00</AliquotaIVA>
+				</DatiCassaPrevidenziale>
+				<ImportoTotaleDocumento>63.44</ImportoTotaleDocumento>
+				<Causale>Fattura di vendita</Causale>
+			</DatiGeneraliDocumento>
+		</DatiGenerali>
+		<DatiBeniServizi>
+			<DettaglioLinee>
+				<NumeroLinea>1</NumeroLinea>
+				<Descrizione>Avviso di parcella n. 83 del  1/04/2022</Descrizione>
+				<PrezzoUnitario>0.00</PrezzoUnitario>
+				<PrezzoTotale>0.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+			</DettaglioLinee>
+			<DettaglioLinee>
+				<NumeroLinea>2</NumeroLinea>
+				<CodiceArticolo>
+					<CodiceTipo>Servizio</CodiceTipo>
+					<CodiceValore>SER01</CodiceValore>
+				</CodiceArticolo>
+				<Descrizione>Autoliquidazione Inail</Descrizione>
+				<DataInizioPeriodo>2022-03-01</DataInizioPeriodo>
+				<DataFinePeriodo>2022-03-31</DataFinePeriodo>
+				<PrezzoUnitario>50.00</PrezzoUnitario>
+				<PrezzoTotale>50.00</PrezzoTotale>
+				<AliquotaIVA>22.00</AliquotaIVA>
+			</DettaglioLinee>
+			<DatiRiepilogo>
+				<AliquotaIVA>22.00</AliquotaIVA>
+				<ImponibileImporto>52.00</ImponibileImporto>
+				<Imposta>11.44</Imposta>
+				<EsigibilitaIVA>I</EsigibilitaIVA>
+				<RiferimentoNormativo>22% - GENERICO</RiferimentoNormativo>
+			</DatiRiepilogo>
+		</DatiBeniServizi>
+		<DatiPagamento>
+			<CondizioniPagamento>TP02</CondizioniPagamento>
+			<DettaglioPagamento>
+				<ModalitaPagamento>MP01</ModalitaPagamento>
+				<DataRiferimentoTerminiPagamento>2022-04-26</DataRiferimentoTerminiPagamento>
+				<GiorniTerminiPagamento>1</GiorniTerminiPagamento>
+				<DataScadenzaPagamento>2022-04-27</DataScadenzaPagamento>
+				<ImportoPagamento>63.44</ImportoPagamento>
+			</DettaglioPagamento>
+		</DatiPagamento>
+	</FatturaElettronicaBody>
+</p:FatturaElettronica>
+
