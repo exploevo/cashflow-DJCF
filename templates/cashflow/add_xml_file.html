@@ -3,9 +3,12 @@
 {% block title %}Add an XML File{% endblock %}
 
 {% block content %}
+<div class="mb-3">  
 <form method="post" enctype="multipart/form-data">
+    <label for="formFileMultiple" class="form-label">Multiple files input example</label>
     {% csrf_token %}
     {{ form }}
     <button type="submit">Upload</button>
 </form>
+</div>
 {% endblock %}
