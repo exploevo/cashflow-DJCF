@@ -9,4 +9,6 @@ class XMLForm(forms.ModelForm):
     class Meta:
         model = XMLUpload
         fields = ['file']
-
+        widgets = {
+            'file': forms.ClearableFileInput(attrs={'multiple': True})
+        }
