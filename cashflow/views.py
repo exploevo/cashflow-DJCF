@@ -28,12 +28,18 @@ def index(request):
 def add_xml_file(request):
     if request.method == 'POST':
         form = XMLForm(request.POST, request.FILES)
+        files = request.FILES.getlist('file')
         if form.is_valid():
-            xml_upload = form.save(commit=False)
-            xml_upload.uploaded_by = request.user
-            xml_upload.save()
+            for f in files:
+                instance = XMLUpload(file=f)
+                instance.uploaded_by = request.user
+                instance.save()
+                
+                #xml_upload = f.save(commit=False) #to upload the form without saving it
+                #xml_upload.uploaded_by = request.user #to assign the user field 
+                #xml_upload.save()
 
-            return redirect('cashflow-index')
+        return redirect('cashflow-index')
     else:
         form = XMLForm()
 
