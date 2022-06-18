@@ -3,16 +3,26 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
-<p>{% for client in client_list %}
-    <p>{{ client.company}}</p>
-    {% endfor %}
+    <div class="row">
+      <div class="col">
+        <p>{% for client in client_list %}
+            <p>{{ client.company}}</p>
+            {% endfor %}
+        </p>
+        <p>Username: {{ user.email }}</p>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <form method="POST" action="counter/">
+            {% csrf_token %}
+            <textarea name="text" id="1" cols="100" rows="25"></textarea><br>
+            <input type="submit" value="Invia">
+        </form>
+      </div>
+    </div>
+<div class="form-floating mb-3"> 
+</div>
 
-</p>
-<p>Username: {{ user.email }}</p>
-<form method="POST" action="counter/">
-    {% csrf_token %}
-    <textarea name="text" id="1" cols="100" rows="25"></textarea><br>
-    <input type="submit" value="Invia">
-</form>
 
 {% endblock %}

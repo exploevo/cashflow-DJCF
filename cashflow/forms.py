@@ -10,5 +10,13 @@ class XMLForm(forms.ModelForm):
         model = XMLUpload
         fields = ['file']
         widgets = {
-            'file': forms.ClearableFileInput(attrs={'multiple': True})
+            'file': forms.ClearableFileInput(attrs={'multiple': True, 'class' : 'form-control' })
         }
+        labels = {
+            'file': 'Upload Files',
+            'comment': 'Select one or many files'
+            }
+        help_texts = {
+            'comment': 'Is possible to upload all the file together '
+            },
+        localized_fields = '__all__'
