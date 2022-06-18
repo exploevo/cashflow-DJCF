@@ -3,9 +3,20 @@
 {% block title %}Add an XML File{% endblock %}
 
 {% block content %}
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form }}
-    <button type="submit">Upload</button>
-</form>
+<div class="row">
+    <div class="col">
+        <div class="form-floating mb-3"> 
+            <form method="post" enctype="multipart/form-data">
+                <br>
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </form>
+            
+        </div>
+    </div>
+    <div class="col">
+      
+    </div>
+  </div>
 {% endblock %}

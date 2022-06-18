@@ -8,7 +8,7 @@
     - Pipfile: /Users/enzolarosa/Sites/cashflow/Pipfile
     - Using /Users/enzolarosa/.pyenv/versions/3.10.0/bin/python3 (3.10.0) 
 - While inside of a pipenv environment, you don't need to say `python3 or pip3 blahblahblah`. You can just write `pip <command>` or `python <command> ...`
-
+- pip freeze —local > requirements.txt create the requirement.txt with the isntalled packages
 
 ### Markdown Notes:
 - **bold**
