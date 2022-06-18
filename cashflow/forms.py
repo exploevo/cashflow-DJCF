@@ -4,7 +4,6 @@ from django.contrib.auth.models import User
 
 from .models import XMLUpload
 
-
 class XMLForm(forms.ModelForm):
     class Meta:
         model = XMLUpload

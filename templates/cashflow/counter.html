@@ -1,2 +1,12 @@
-<h1>Number f words</h1>
-<p>{{number }}</p>
+{% extends 'base.html' %}
+
+{% block title %}Word Counter{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col">
+        <h1>Number f words</h1>
+        <p>{{number }}</p>
+    </div>
+</div>
+{% endblock %}
