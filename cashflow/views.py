@@ -4,7 +4,8 @@ from django.shortcuts import render, redirect
 # from django.views import generic
 # from django.contrib.auth import login
 from django.contrib import messages
-from pathlib import Path
+import pandas as pd
+import xmltodict
 
 from .models import Client, Supplier, Invoice, XMLUpload
 from .forms import XMLForm
@@ -35,12 +36,27 @@ def add_xml_file(request):
             for f in files:
                 if f.name.split(".")[-1] == 'xml':
                     messages.success(request, f"New file uploaded: {f.name}")
+                    instance = XMLUpload(file=f)
+                    instance.uploaded_by = request.user
+                    instance.save()
+                    with open('media/xmlfiles/'+f.name, encoding='unicode_escape') as fd:
+                        obj = xmltodict.parse(fd.read())
+                        df = pd.DataFrame(obj)
+                        messages.info(request, f"File xml: {df}")
+                        # the process of parsing the file
+                        '''
+                        1 check if the invoice is selling or buyng in relation to the user
+                        2 check if the client or the seller is already inside the db
+                        3 if it is not add client and seller and save the id
+                        4 insert the data inside the invoice and the id of the client or the seller
+                        5 save all and return success or error
+                        '''
                 else:
                     messages.error(request, f"{f.name} Is not an xml upload stopped! ")
                     return redirect('cashflow-index')
-                instance = XMLUpload(file=f)
-                instance.uploaded_by = request.user
-                instance.save()
+                #instance = XMLUpload(file=f)
+                #instance.uploaded_by = request.user
+                #instance.save()
                 
                 #xml_upload = f.save(commit=False) #to upload the form without saving it
                 #xml_upload.uploaded_by = request.user #to assign the user field 

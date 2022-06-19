@@ -70,12 +70,12 @@ class Invoice(models.Model):
     payment_cond = models.CharField(max_length=4, choices=PAYMENT_COND)
     payment_mod = models.CharField(max_length=4, choices=PAYMENT_MOD)
     date_invoice = models.DateField()
-    payment_days = models.IntegerField()
+    payment_days = models.IntegerField(blank=True)
     date_payment = models.DateField()
     amount_invoice = models.FloatField()
     # ForeignKey are Many to one relationship: Many invoices to one Client / Seller
-    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='invoices')
-    seller = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='invoices')
+    client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='invoices', blank=True)
+    supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='invoices', blank=True)
     
     class Meta:
         ordering = ['date_invoice', 'date_payment']

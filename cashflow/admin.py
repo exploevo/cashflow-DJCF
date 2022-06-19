@@ -19,10 +19,10 @@ class SupplierAdmin(admin.ModelAdmin):
 
 @admin.register(Invoice)
 class Invoice(admin.ModelAdmin):
-    list_display = ['client', 'seller', 'date_invoice', 'date_payment', 'amount_invoice']
-    list_filter = ['date_invoice', 'date_payment', 'client', 'seller']
-    search_fields = ['client', 'seller', 'date_invoice', 'date_payment']
-    ordering = ['date_invoice', 'date_payment', 'client', 'seller']
+    list_display = ['client', 'supplier', 'date_invoice', 'date_payment', 'amount_invoice']
+    list_filter = ['date_invoice', 'date_payment', 'client', 'supplier']
+    search_fields = ['client', 'supplier', 'date_invoice', 'date_payment']
+    ordering = ['date_invoice', 'date_payment', 'client', 'supplier']
 
 @admin.register(XMLUpload)
 class XMLUpload(admin.ModelAdmin):
