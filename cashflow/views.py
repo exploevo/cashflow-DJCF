@@ -1,8 +1,10 @@
 from contextvars import Context
+from email import message
 from django.shortcuts import render, redirect
 # from django.views import generic
 # from django.contrib.auth import login
 from django.contrib import messages
+from pathlib import Path
 
 from .models import Client, Supplier, Invoice, XMLUpload
 from .forms import XMLForm
@@ -31,6 +33,11 @@ def add_xml_file(request):
         files = request.FILES.getlist('file')
         if form.is_valid():
             for f in files:
+                if f.name.split(".")[-1] == 'xml':
+                    messages.success(request, f"New file uploaded: {f.name}")
+                else:
+                    messages.error(request, f"{f.name} Is not an xml upload stopped! ")
+                    return redirect('cashflow-index')
                 instance = XMLUpload(file=f)
                 instance.uploaded_by = request.user
                 instance.save()
