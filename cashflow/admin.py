@@ -21,12 +21,14 @@ class SupplierAdmin(admin.ModelAdmin):
 class Invoice(admin.ModelAdmin):
     list_display = ['client', 'supplier', 'date_invoice', 'date_payment', 'amount_invoice']
     list_filter = ['date_invoice', 'date_payment', 'client', 'supplier']
-    search_fields = ['client', 'supplier', 'date_invoice', 'date_payment']
+    search_fields = ['client__name', 'client__last_name', 'client__company',
+                    'supplier__name', 'supplier__last_name', 'supplier__company',
+                    'amount_invoice']
     ordering = ['date_invoice', 'date_payment', 'client', 'supplier']
 
 @admin.register(XMLUpload)
 class XMLUpload(admin.ModelAdmin):
-    list_display = ['uploaded_by', 'datetime_uploaded', 'file']
-    list_filter = ['uploaded_by', 'file']
-    search_fields = ['uploaded_by', 'datetime_uploaded', 'file']
-    ordering = ['uploaded_by', 'datetime_uploaded', 'file']
+    list_display = ['name', 'uploaded_by', 'datetime_uploaded', 'file']
+    list_filter = ['name', 'uploaded_by']
+    search_fields = ['name']
+    ordering = ['name', 'uploaded_by', 'datetime_uploaded']

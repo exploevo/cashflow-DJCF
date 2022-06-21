@@ -35,22 +35,83 @@ def add_xml_file(request):
         if form.is_valid():
             for f in files:
                 if f.name.split(".")[-1] == 'xml':
-                    messages.success(request, f"New file uploaded: {f.name}")
-                    instance = XMLUpload(file=f)
-                    instance.uploaded_by = request.user
-                    instance.save()
-                    with open('media/xmlfiles/'+f.name, encoding='unicode_escape') as fd:
-                        obj = xmltodict.parse(fd.read())
-                        df = pd.DataFrame(obj)
-                        messages.info(request, f"File xml: {df}")
-                        # the process of parsing the file
-                        '''
-                        1 check if the invoice is selling or buyng in relation to the user
-                        2 check if the client or the seller is already inside the db
-                        3 if it is not add client and seller and save the id
-                        4 insert the data inside the invoice and the id of the client or the seller
-                        5 save all and return success or error
-                        '''
+                    #print (f.name)
+                    #print (XMLUpload.objects.filter(file=f.name))
+                    if XMLUpload.objects.filter(name=f.name).exists():
+                        messages.warning(request, f"File {f.name} already exist")
+                        #return redirect('cashflow-index')
+                    else:
+                        messages.success(request, f"New file uploaded: {f.name}")
+                        instance = XMLUpload(name=f.name, file=f)
+                        instance.uploaded_by = request.user
+                        instance.save()
+                        with open('media/xmlfiles/'+f.name, encoding='unicode_escape') as fd:
+                            obj = xmltodict.parse(fd.read())
+                            df = pd.DataFrame(obj)
+                            #CLIENT INSERT 
+                            c_iva = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+                            c_fis = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['CodiceFiscale']
+                            try: 
+                                company=df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Denominazione']
+                            except KeyError:
+                                company = ''
+                            try:
+                                name=df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Nome']
+                                l_name = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Cognome']
+                            except KeyError:
+                                name = ''
+                                l_name = ''
+                            user = request.user
+                            messages.info(request, f"CLIENT: {c_iva}, {c_fis}, {company}, {name}, {l_name}")
+                            client_ins = Client(piva=c_iva, cod_fiscale = c_fis, company = company, name = name, last_name = l_name, user = user)
+                            
+                            #SUPPLIER INSERT 
+                            s_iva = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+                            s_fis = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['CodiceFiscale']
+                            try: 
+                                company=df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Denominazione']
+                            except KeyError:
+                                company = ''
+                            try:
+                                name=df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Nome']
+                                l_name = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Cognome']
+                            except KeyError:
+                                name = ''
+                                l_name = ''
+                            messages.info(request, f"SUPPLIER: {c_iva}, {c_fis}, {company}, {name}, {l_name}")
+                            supplier_ins = Supplier(piva=s_iva, cod_fiscale = s_fis, company = company, name = name, last_name = l_name, user = user)
+                            #if Client.objects.get(piva=c_iva) != None and not c_iva:
+                            client_ins.save()
+                            #if Supplier.objects.get(piva=s_iva) != s_iva:
+                            supplier_ins.save()
+                            #INVOICE DATA
+                            doc_num = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero']
+                            pay_cond = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento']
+                            pay_mod = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento']
+                            date_inv = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['DataRiferimentoTerminiPagamento']
+                            pay_days = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['GiorniTerminiPagamento']
+                            date_pay = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['DataScadenzaPagamento']
+                            amount = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ImportoPagamento']
+                            client = Client.objects.get(piva=c_iva)
+                            supplier = Supplier.objects.get(piva=s_iva)
+                            messages.info(request, f"INVOICE: {pay_cond}, {pay_mod}, {date_inv}, {pay_days}, {date_pay}, {amount}, {client}, {supplier} ")
+                            invoice_ins = Invoice(doc_num = doc_num, payment_cond=pay_cond, payment_mod = pay_mod, 
+                                    date_invoice = date_inv, payment_days = pay_days, 
+                                    date_payment = date_pay, amount_invoice = amount,
+                                    client = client, supplier = supplier)
+                            #Save the data 
+                            if Invoice.objects.filter(doc_num=doc_num).exists():
+                                messages.warning(request, f"INVOICE number {doc_num} already exixst ")
+                            else:
+                                invoice_ins.save()
+                            # the process of parsing the file
+                            '''
+                            1 check if the invoice is selling or buyng in relation to the user
+                            2 check if the client or the seller is already inside the db
+                            3 if it is not add client and seller and save the id
+                            4 insert the data inside the invoice and the id of the client or the seller
+                            5 save all and return success or error
+                            '''
                 else:
                     messages.error(request, f"{f.name} Is not an xml upload stopped! ")
                     return redirect('cashflow-index')

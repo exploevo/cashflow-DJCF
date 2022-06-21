@@ -13,7 +13,7 @@ User = get_user_model()
 # Create your models (tables) here.
 class Client(models.Model):
     piva = models.CharField(primary_key=True, max_length=11)
-    cod_fiscale = models.CharField(max_length=16)
+    cod_fiscale = models.CharField(max_length=16, blank=True)
     company = models.CharField(max_length=30, blank=True )
     name = models.CharField(max_length=20, blank=True)
     last_name = models.CharField(max_length=20, blank=True)
@@ -21,11 +21,11 @@ class Client(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.company}, {self.name}, {self.last_name}'
+        return f'{self.company} {self.name} {self.last_name}'
 
 class Supplier(models.Model):
     piva = models.CharField(primary_key=True, max_length=11)
-    cod_fiscale = models.CharField(max_length=16)
+    cod_fiscale = models.CharField(max_length=16, blank=True)
     company = models.CharField(max_length=30, blank=True)
     name = models.CharField(max_length=20, blank=True)
     last_name = models.CharField(max_length=20, blank=True)
@@ -33,7 +33,7 @@ class Supplier(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.company}, {self.name}, {self.last_name}'
+        return f'{self.company} {self.name} {self.last_name}'
 
 class Invoice(models.Model):
     #Attrbutes
@@ -67,6 +67,7 @@ class Invoice(models.Model):
         ('MP21', 'MP21 - SEPA Direct Debit B2B'),
         ('MP22', 'MP22 - Trattenuta su somme già riscosse'),
     )
+    doc_num = models.CharField(max_length=10)
     payment_cond = models.CharField(max_length=4, choices=PAYMENT_COND)
     payment_mod = models.CharField(max_length=4, choices=PAYMENT_MOD)
     date_invoice = models.DateField()
@@ -85,10 +86,11 @@ class Invoice(models.Model):
         return reverse('invoice', kwargs={'id' : self.id})'''
     
     def __str__(self):
-        return f'{self.date_invoice}, {self.date_payment}, {self.client}, {self.seller}'
+        return f'{self.date_invoice} {self.date_payment} {self.client} {self.supplier}'
 
 class XMLUpload(models.Model):
     # Attributes of the model
+    name = models.CharField(max_length=20, default='test.xml')
     file = models.FileField(upload_to='xmlfiles')
     datetime_uploaded = models.DateField(auto_now_add=True)
 
@@ -96,7 +98,7 @@ class XMLUpload(models.Model):
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='xml_uploads')
 
     def __str__(self):
-        return f'{self.file}'
+        return f'{self.name}, {self.file}'
     
     def get_absolute_url(self):
         """Returns the URL to access a particular author instance."""
