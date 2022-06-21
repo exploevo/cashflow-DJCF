@@ -35,11 +35,8 @@ def add_xml_file(request):
         if form.is_valid():
             for f in files:
                 if f.name.split(".")[-1] == 'xml':
-                    #print (f.name)
-                    #print (XMLUpload.objects.filter(file=f.name))
                     if XMLUpload.objects.filter(name=f.name).exists():
                         messages.warning(request, f"File {f.name} already exist")
-                        #return redirect('cashflow-index')
                     else:
                         messages.success(request, f"New file uploaded: {f.name}")
                         instance = XMLUpload(name=f.name, file=f)
@@ -80,9 +77,8 @@ def add_xml_file(request):
                                 l_name = ''
                             messages.info(request, f"SUPPLIER: {c_iva}, {c_fis}, {company}, {name}, {l_name}")
                             supplier_ins = Supplier(piva=s_iva, cod_fiscale = s_fis, company = company, name = name, last_name = l_name, user = user)
-                            #if Client.objects.get(piva=c_iva) != None and not c_iva:
+                            #Save client and supplier to the DB
                             client_ins.save()
-                            #if Supplier.objects.get(piva=s_iva) != s_iva:
                             supplier_ins.save()
                             #INVOICE DATA
                             doc_num = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero']
@@ -106,19 +102,19 @@ def add_xml_file(request):
                                 invoice_ins.save()
                             # the process of parsing the file
                             '''
-                            1 check if the invoice is selling or buyng in relation to the user
-                            2 check if the client or the seller is already inside the db
-                            3 if it is not add client and seller and save the id
-                            4 insert the data inside the invoice and the id of the client or the seller
-                            5 save all and return success or error
+                           OK 1 check if the invoice file already exists 
+                           OK 2 check if the client or the seller is already inside the db 
+                           OK 3 if it is not add client and seller and save the id 
+                           OK 4 insert the data inside the invoice and the id of the client or the seller 
+                           OK 5 save all and return success or error
                             '''
                 else:
                     messages.error(request, f"{f.name} Is not an xml upload stopped! ")
                     return redirect('cashflow-index')
+                #OLD PROCEDURE
                 #instance = XMLUpload(file=f)
                 #instance.uploaded_by = request.user
                 #instance.save()
-                
                 #xml_upload = f.save(commit=False) #to upload the form without saving it
                 #xml_upload.uploaded_by = request.user #to assign the user field 
                 #xml_upload.save()
@@ -129,9 +125,6 @@ def add_xml_file(request):
 
     context = {'form': form}
     return render(request, 'cashflow/add_xml_file.html', context=context)
-            
-
-
 
 
 
