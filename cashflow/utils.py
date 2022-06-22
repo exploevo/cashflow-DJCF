@@ -88,7 +88,7 @@ def get_invoice_from_xml(df):
     doc_num = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero']
     payment_cond = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento']
     payment_mod = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento']
-    date_invoice = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['Data']
+    date_invoice = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data']
     try:
         payment_days = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['GiorniTerminiPagamento']
     except KeyError:
