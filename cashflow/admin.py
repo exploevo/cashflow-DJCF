@@ -1,6 +1,5 @@
-from turtle import circle
 from django.contrib import admin
-from .models import Client, Supplier, Invoice, XMLUpload
+from .models import Client, Supplier, Invoice, XMLUpload, Profile
 
 # Register your models here.
 @admin.register(Client)
@@ -32,3 +31,8 @@ class XMLUpload(admin.ModelAdmin):
     list_filter = ['name', 'uploaded_by']
     search_fields = ['name']
     ordering = ['name', 'uploaded_by', 'datetime_uploaded']
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'piva', 'photo']
+    raw_id_fields = ['user']

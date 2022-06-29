@@ -2,6 +2,10 @@ import xmltodict
 import pandas as pd
 import re
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Client, Supplier, Invoice, XMLUpload
+
 from pathlib import Path
 
 import sys
@@ -30,28 +34,32 @@ def process_p7m_file(file):
     if res == 1:
         databytes = crypto._bio_to_string(bio_out)
         obj = xmltodict.parse(databytes)
-        df = pd.DataFrame(obj)
-        client_data = get_client_from_xml(df)
-        supplier_data = get_supplier_from_xml(df)
-        invoice_data = get_invoice_from_xml(df)
+        #df = pd.DataFrame(obj)
+        client_data = get_client_from_xml(obj)
+        supplier_data = get_supplier_from_xml(obj)
+        invoice_data = get_invoice_from_xml(obj)
         return (client_data, supplier_data, invoice_data)
-    else:
-        errno = _lib.ERR_get_error()
-        errstrlib = _ffi.string(_lib.ERR_lib_error_string(errno))
-        errstrfunc = _ffi.string(_lib.ERR_func_error_string(errno))
-        errstrreason = _ffi.string(_lib.ERR_reason_error_string(errno))
-        print(errstrreason)
 
 def get_client_from_xml(df):
-    iva = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
-    fis = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['CodiceFiscale']
+    try:
+        df['p:FatturaElettronica']
+        head = 'p:FatturaElettronica'
+    except KeyError:
+        all_keys = list(df)
+        head = all_keys[0]
+
+    iva = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+    try:
+        fis = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['CodiceFiscale']
+    except KeyError:
+        fis = ''
     try: 
-        company = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Denominazione']
+        company = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Denominazione']
     except KeyError:
         company = ''
     try:
-        name=df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Nome']
-        last_name = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Cognome']
+        name=df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Nome']
+        last_name = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['Anagrafica']['Cognome']
     except KeyError:
         name = ''
         last_name = ''
@@ -64,15 +72,25 @@ def get_client_from_xml(df):
     }
 
 def get_supplier_from_xml(df):
-    iva = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
-    fis = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['CodiceFiscale']
+    try:
+        df['p:FatturaElettronica']
+        head = 'p:FatturaElettronica'
+    except KeyError:
+        all_keys = list(df)
+        head = all_keys[0]
+
+    iva = df[head]['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+    try:
+        fis = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['CodiceFiscale']
+    except KeyError:
+        fis = ''
     try: 
-        company=df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Denominazione']
+        company=df[head]['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Denominazione']
     except KeyError:
         company = ''
     try:
-        name=df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Nome']
-        last_name = df['p:FatturaElettronica']['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Cognome']
+        name=df[head]['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Nome']
+        last_name = df[head]['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['Anagrafica']['Cognome']
     except KeyError:
         name = ''
         last_name = ''
@@ -85,16 +103,26 @@ def get_supplier_from_xml(df):
     }
 
 def get_invoice_from_xml(df):
-    doc_num = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero']
-    payment_cond = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento']
-    payment_mod = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento']
-    date_invoice = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data']
     try:
-        payment_days = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['GiorniTerminiPagamento']
+        df['p:FatturaElettronica']
+        head = 'p:FatturaElettronica'
+    except KeyError:
+        all_keys = list(df)
+        head = all_keys[0]
+    
+    doc_num = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero']
+    payment_cond = df[head]['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento']
+    payment_mod = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento']
+    date_invoice = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data']
+    try:
+        payment_days = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['GiorniTerminiPagamento']
     except KeyError:
         payment_days = '0'
-    date_payment = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['DataScadenzaPagamento']
-    amount_invoice = df['p:FatturaElettronica']['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ImportoPagamento']
+    try:
+        date_payment = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['DataScadenzaPagamento']
+    except KeyError:
+        date_payment = '1900-01-01'
+    amount_invoice = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ImportoPagamento']
     return {  
         'doc_num': doc_num,
         'payment_cond': payment_cond,
@@ -104,3 +132,20 @@ def get_invoice_from_xml(df):
         'date_payment': date_payment,
         'amount_invoice': amount_invoice,
     }
+
+def insert_db(user, client_data, supplier_data, invoice_data, request):
+    messages.info(request, 'CLIENT: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**client_data))
+    client = Client(**client_data, user=user)
+    messages.info(request, 'SUPPLIER: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**supplier_data))
+    supplier = Supplier(**supplier_data, user=user)
+    #Save client and supplier to the DB
+    client.save()
+    supplier.save()
+    messages.info(request, "INVOICE: {payment_cond}, {payment_mod}, {date_invoice}, {payment_days}, {date_payment}, {amount_invoice}, {client}, {supplier}".format(**invoice_data, client=client, supplier=supplier))
+    invoice = Invoice(**invoice_data, client=client, supplier=supplier)
+    #Save the data 
+    if Invoice.objects.filter(doc_num=invoice.doc_num).exists():
+        messages.warning(request, f"INVOICE number {invoice.doc_num} already exist.")
+    else:
+        pass
+        invoice.save()

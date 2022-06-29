@@ -1,6 +1,8 @@
+from tkinter import CASCADE
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.urls import reverse
+from django.conf import settings
 #from django.contrib.auth.models import AbstractUser
 
 # Base User Model
@@ -9,6 +11,15 @@ User = get_user_model()
 #How To inser a Custom User Model?
 #class User(AbstractUser):
 #    piva = models.CharField(max_length=11, unique=True)
+
+class Profile(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL,
+                                on_delete=models.CASCADE)
+    piva = models.CharField(max_length=11)
+    photo = models.ImageField(upload_to='users/%Y/%m/%d/', blank=True)
+
+    def __str__(self):
+        return f'Profile of {self.user.username}'
 
 # Create your models (tables) here.
 class Client(models.Model):

@@ -32,14 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'cashflow',  # <- The name of your app
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'cashflow',  # <- The name of your app
 ]
 
 MIDDLEWARE = [
@@ -141,3 +141,12 @@ MESSAGE_TAGS = {
         messages.WARNING: 'alert-warning',
         messages.ERROR: 'alert-danger',
  }
+
+ #LOGIN PARAMETERS
+LOGIN_REDIRECT_URL = "dashboard"
+LOGOUT_REDIRECT_URL = "dashboard"
+LOGIN_URL = 'login'
+LOGOUT_URL = 'logout'
+
+#EMAIL DEVELOPMENT SETTINGS
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

@@ -1,16 +1,16 @@
 
 from django.shortcuts import render, redirect
 # from django.views import generic
-# from django.contrib.auth import login
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .models import Client, Supplier, Invoice, XMLUpload
-from .forms import XMLForm
-from .utils import process_xml_file, process_p7m_file
+from .models import Client, Supplier, Invoice, XMLUpload, Profile
+from .forms import XMLForm, UserRegistrationForm, UserEditForm, ProfileEditForm
+from .utils import process_xml_file, process_p7m_file, insert_db
 
 def index(request):
     """View function for home page of site."""
-
     # Generate counts of some of the main objects
     client_list = Client.objects.all()
     supplier_list = Supplier.objects.all()
@@ -24,6 +24,51 @@ def index(request):
 
     return render(request, 'index.html', context=context)
 
+@login_required
+def dashboard(request):
+    return render(request, 'cashflow/dashboard.html', {'section' : 'dashboard'})
+
+@login_required
+def edit(request):
+    if request.method == 'POST':
+        user_form = UserEditForm(instance = request.user, data=request.POST)
+        profile_form = ProfileEditForm(instance = request.user.profile,
+                                        data = request.POST,
+                                        files = request.FILES)
+        if user_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, "Data Successfully Updated!")
+        #I would like to reload the page in order to see the image    
+    else:
+        user_form = UserEditForm(instance = request.user)
+        profile_form = ProfileEditForm(instance = request.user.profile)
+    
+    return render(request, 'cashflow/edit.html', 
+                    {'user_form' : user_form, 
+                    'profile_form' : profile_form})
+
+def register(request):
+    if request.method == 'POST':
+        user_form = UserRegistrationForm(request.POST)
+        if user_form.is_valid():
+            # Create a new user object but avoid saving it yet
+            new_user = user_form.save(commit=False)
+            # Set the chosen password
+            new_user.set_password(
+                user_form.cleaned_data['password'])
+            # Save the User object
+            new_user.save()
+            #create the user profile
+            Profile.objects.create(user=new_user)
+            return render(request,
+                          'cashflow/register_done.html',
+                          {'new_user': new_user})
+    else:
+        user_form = UserRegistrationForm()
+    return render(request,
+                  'cashflow/register.html',
+                  {'user_form': user_form})
 
 def add_xml_file(request):
     if request.method == 'POST':
@@ -40,22 +85,8 @@ def add_xml_file(request):
                         xml_upload.save()
                         messages.success(request, f"New file uploaded: {file.name}")
                         client_data, supplier_data, invoice_data = process_xml_file(xml_upload.file)
-                           
                         user = request.user
-                        messages.info(request, 'CLIENT: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**client_data))
-                        client = Client(**client_data, user=user)
-                        messages.info(request, 'SUPPLIER: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**supplier_data))
-                        supplier = Supplier(**supplier_data, user=user)
-                        #Save client and supplier to the DB
-                        client.save()
-                        supplier.save()
-                        messages.info(request, "INVOICE: {payment_cond}, {payment_mod}, {date_invoice}, {payment_days}, {date_payment}, {amount_invoice}, {client}, {supplier}".format(**invoice_data, client=client, supplier=supplier))
-                        invoice = Invoice(**invoice_data, client=client, supplier=supplier)
-                        #Save the data 
-                        if Invoice.objects.filter(doc_num=invoice.doc_num).exists():
-                            messages.warning(request, f"INVOICE number {invoice.doc_num} already exist.")
-                        else:
-                            invoice.save()
+                        insert_db(user,client_data, supplier_data, invoice_data, request)
 
                 elif file.name.split(".")[-1] == 'p7m':
                     if XMLUpload.objects.filter(name=file.name).exists():
@@ -67,21 +98,7 @@ def add_xml_file(request):
                         messages.success(request, f"New file uploaded: {file.name}")
                         client_data, supplier_data, invoice_data = process_p7m_file(file.name)
                         user = request.user
-                        messages.info(request, 'CLIENT: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**client_data))
-                        client = Client(**client_data, user=user)
-                        messages.info(request, 'SUPPLIER: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**supplier_data))
-                        supplier = Supplier(**supplier_data, user=user)
-                        #Save client and supplier to the DB
-                        client.save()
-                        supplier.save()
-                        messages.info(request, "INVOICE: {payment_cond}, {payment_mod}, {date_invoice}, {payment_days}, {date_payment}, {amount_invoice}, {client}, {supplier}".format(**invoice_data, client=client, supplier=supplier))
-                        invoice = Invoice(**invoice_data, client=client, supplier=supplier)
-                        #Save the data 
-                        if Invoice.objects.filter(doc_num=invoice.doc_num).exists():
-                            messages.warning(request, f"INVOICE number {invoice.doc_num} already exist.")
-                        else:
-                            invoice.save()
-                    return redirect('cashflow-index')
+                        insert_db(user,client_data, supplier_data, invoice_data, request)
                 else:
                     messages.error(request, f"<h2>{file.name} Is not a valid File stopped! </h2>")
                     return redirect('cashflow-index')
