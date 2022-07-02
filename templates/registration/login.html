@@ -17,8 +17,10 @@
 <div class="login-form">
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Log In</button>
+        <table class="table table-hover">
+        {{ form }}
+        </table>
+        <button type="submit" class="btn btn-success">Log In</button>
     </form>
     <p>
         <a href="{% url 'password_reset' %}">Forgotten your password?</a>

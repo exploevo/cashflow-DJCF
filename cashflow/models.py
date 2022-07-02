@@ -19,7 +19,7 @@ class Profile(models.Model):
     photo = models.ImageField(upload_to='users/%Y/%m/%d/', blank=True)
 
     def __str__(self):
-        return f'Profile of {self.user.username}'
+        return f'Profile of {self.user.username} {self.piva}'
 
 # Create your models (tables) here.
 class Client(models.Model):
@@ -88,6 +88,7 @@ class Invoice(models.Model):
     # ForeignKey are Many to one relationship: Many invoices to one Client / Seller
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='invoices', blank=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='invoices', blank=True)
+    
     
     class Meta:
         ordering = ['date_invoice', 'date_payment']

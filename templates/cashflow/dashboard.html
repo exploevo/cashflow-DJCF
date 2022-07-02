@@ -8,6 +8,8 @@
         or <a href="{% url "password_change" %}">change your password</a>.</p>
     <h3>CashFlow Data</h3>
     <div>
+        SEC -- {{ piva_u.piva }} -- {{ user_r.id }} <br>
+        TOT Gennaio {{ tot_gennaio }}
         <h2>Here I would like to insert the table with the 
             cashflow situation.
         </h2>
@@ -17,5 +19,45 @@
         <p>the query in the db is made considering the pvia of the user</p>
         <p>thanks to that I can understad who is the client and the seller</p>
         <p>and conequently create che table</p>
+    </div>
+    <div>
+            {% for key, value in vendite.items %}
+            <p>{{ key }}</p>
+                {% for v in value %}
+                    {% for k, va in v.items %}
+                        {{ k }} - {{ va }}
+                    {% endfor %}
+                {% endfor %}
+            {% endfor %}
+
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th scope="col">First</th>
+                <th scope="col">Last</th>
+                <th scope="col">Handle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">1</th>
+                <td>Mark</td>
+                <td>Otto</td>
+                <td>@mdo</td>
+              </tr>
+              <tr>
+                <th scope="row">2</th>
+                <td>Jacob</td>
+                <td>Thornton</td>
+                <td>@fat</td>
+              </tr>
+              <tr>
+                <th scope="row">3</th>
+                <td colspan="2">Larry the Bird</td>
+                <td>@twitter</td>
+              </tr>
+            </tbody>
+          </table>
     </div>
 {% endblock%}

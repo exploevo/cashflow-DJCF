@@ -5,8 +5,10 @@
     <p>You can edit your account using the following form:</p>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ user_form.as_p }}
-        {{ profile_form.as_p }}
-        <p><input type="submit" value="Save Changes"></p>
+        <table class="table table-hover">
+        {{ user_form }}
+        {{ profile_form }}
+        </table>
+        <p><input type="submit" value="Save Changes" class="btn btn-success"></p>
     </form>
 {% endblock %}

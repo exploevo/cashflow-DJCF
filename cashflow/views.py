@@ -27,7 +27,50 @@ def index(request):
 
 @login_required
 def dashboard(request):
-    return render(request, 'cashflow/dashboard.html', {'section' : 'dashboard'})
+    #inserire un try except per reindirizzare (redirect) su messaggio di contatto.
+    #potresti non trovare nessun record perché la partita Iva è inserita errata
+    piva_u = Profile.objects.get(user = request.user)
+    user_r = request.user
+    gennaio = Invoice.objects.filter(date_payment__year = 2022, date_payment__month = 1, supplier__piva = piva_u)
+    tot_gennaio = 0
+    for invoice in gennaio:
+        tot_gennaio += invoice.amount_invoice
+    vendite_per_mese = {
+        'cliente1': [{'gen': 100,
+                    'feb': 200,
+                    'mar': 150,
+                    'apr': 300,
+                    'giu': 100,
+                    'lug': 50,
+                    'ago': 20,
+                    'set': 150,
+                    'ott': 200,
+                    'dic': 400}],
+        'cliente2': [{'gen': 80,
+                    'feb': 230,
+                    'mar': 120,
+                    'apr': 230,
+                    'giu': 50,
+                    'lug': 0,
+                    'ago': 40,
+                    'set': 60,
+                    'ott': 120,
+                    'dic': 250}],
+        'cliente3': [{'gen': 10,
+                    'feb': 20,
+                    'mar': 15,
+                    'apr': 30,
+                    'giu': 10,
+                    'lug': 5,
+                    'ago': 2,
+                    'set': 10,
+                    'ott': 20,
+                    'dic': 40}]
+    }
+    return render(request, 'cashflow/dashboard.html', {'piva_u' : piva_u,
+                                                        'user_r' : user_r,
+                                                        'tot_gennaio' : tot_gennaio,
+                                                        'vendite' : vendite_per_mese})
 
 @login_required
 def edit(request):
@@ -71,7 +114,8 @@ def register(request):
             messages.success(request, "Profile Successfully Created!")
             return render(request,
                           'cashflow/register_done.html',
-                          {'new_user': new_user})
+                          {'new_user': new_user,
+                          })
     else:
         user_form = UserRegistrationForm()
         profile_form = ProfileEditForm()
@@ -113,7 +157,7 @@ def add_xml_file(request):
                     messages.error(request, f"<h2>{file.name} Is not a valid File stopped! </h2>")
                     return redirect('cashflow-index')
 
-        return redirect('cashflow-index')
+        return redirect('dashboard')
     else:
         form = XMLForm()
 
