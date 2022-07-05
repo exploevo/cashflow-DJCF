@@ -4,60 +4,95 @@
 
 {% block content %}
     <h1>Dashboard</h1>
-    <p><h2>Welcome  to your Dashoard {{ user.first_name}}. </h2><br> You can <a href="{% url "edit" %}">edit your profile</a> 
-        or <a href="{% url "password_change" %}">change your password</a>.</p>
-    <h3>CashFlow Data</h3>
-    <div>
-        SEC -- {{ piva_u.piva }} -- {{ user_r.id }} <br>
-        TOT Gennaio {{ tot_gennaio }}
-        <h2>Here I would like to insert the table with the 
-            cashflow situation.
-        </h2>
-        <p>the structure of th tabe will be formed by two table</p>
-        <p>one for the client with the income value for month </p>
-        <p>one with the seller with the expence for month</p>
-        <p>the query in the db is made considering the pvia of the user</p>
-        <p>thanks to that I can understad who is the client and the seller</p>
-        <p>and conequently create che table</p>
+    <div class="row">
+        <div class="col">
+            <h3>CashFlow Data</h3>
+            <p>{{ clients }}</p>
+        </div>
     </div>
-    <div>
-            {% for key, value in vendite.items %}
-            <p>{{ key }}</p>
-                {% for v in value %}
-                    {% for k, va in v.items %}
-                        {{ k }} - {{ va }}
-                    {% endfor %}
-                {% endfor %}
-            {% endfor %}
+    <div class="w-100"></div>
+    <div class="row">
+        <div class="col-8">
+        TOT Gennaio {{ tot_gennaio }}
+        Invoice - {{ invoices.date_payment }}
 
+        <br>
+        </div>
+    </div>
+    <div class="row">
+        <div class="w-100">
+        <h4>Client</h4>
           <table class="table table-hover">
             <thead>
               <tr>
-                <th scope="col">#</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
+                <th scope="col">Client</th>
+                <th scope="col">Jan</th>
+                <th scope="col">Feb</th>
+                <th scope="col">Mar</th>
+                <th scope="col">Apr</th>
+                <th scope="col">May</th>
+                <th scope="col">Jun</th>
+                <th scope="col">Jul</th>
+                <th scope="col">Aug</th>
+                <th scope="col">Sep</th>
+                <th scope="col">Oct</th>
+                <th scope="col">Nov</th>
+                <th scope="col">Dec</th>
+                <th scope="col">Tot Cli</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-              </tr>
-              <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-              </tr>
-              <tr>
-                <th scope="row">3</th>
-                <td colspan="2">Larry the Bird</td>
-                <td>@twitter</td>
-              </tr>
+                {% for key, value in clients.items %}
+                <tr>
+                <th scope="row">{{ key }}</th>
+                <td>{{ value }}</td>
+                    
+                </tr>
+                {% endfor %}
             </tbody>
           </table>
+        </div>
+    </div>
+    <div class="w-100"><hr></div>
+    <div class="row">
+        <div class="w-100">
+        <h4>Client</h4>
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th scope="col">Client</th>
+                <th scope="col">Jan</th>
+                <th scope="col">Feb</th>
+                <th scope="col">Mar</th>
+                <th scope="col">Apr</th>
+                <th scope="col">May</th>
+                <th scope="col">Jun</th>
+                <th scope="col">Jul</th>
+                <th scope="col">Aug</th>
+                <th scope="col">Sep</th>
+                <th scope="col">Oct</th>
+                <th scope="col">Nov</th>
+                <th scope="col">Dec</th>
+                <th scope="col">Tot Cli</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for key, value in sells.items %}
+                <tr>
+                <th scope="row">{{ key }}</th>
+                    {% for v in value %}
+                        {% for k, va in v.items %}
+                       {% if 'tot' in k %} 
+                        <th scope="row" >{{ va }}</th>
+                        {% else %}
+                        <td>{{ va }}</td>
+                        {% endif%}
+                        {% endfor %}
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+        </div>
     </div>
 {% endblock%}

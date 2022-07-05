@@ -32,7 +32,7 @@ class Client(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f'{self.company} {self.name} {self.last_name}'
+        return f'{self.company} {self.name} {self.last_name} {self.user}'
 
 class Supplier(models.Model):
     piva = models.CharField(primary_key=True, max_length=11)

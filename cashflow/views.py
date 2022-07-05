@@ -31,46 +31,78 @@ def dashboard(request):
     #potresti non trovare nessun record perché la partita Iva è inserita errata
     piva_u = Profile.objects.get(user = request.user)
     user_r = request.user
-    gennaio = Invoice.objects.filter(date_payment__year = 2022, date_payment__month = 1, supplier__piva = piva_u)
-    tot_gennaio = 0
-    for invoice in gennaio:
-        tot_gennaio += invoice.amount_invoice
-    vendite_per_mese = {
+    clients = Client.objects.filter(user = request.user)
+    client_list = Client.objects.filter(user = request.user).values()
+    #invoice_list = Invoice.objects.get(client = clients.piva)
+    client_list2 ={}
+    for client in clients:
+        year = 2022
+        month = 0o5 #create a range variable or xrange 
+        tot = 0
+        if client.name is '':
+            #create a cicle of each month and create a dict
+            # range from 1 to 12 or 0 to 11 where i insert the amount
+            # for each month i create a dict key the number of the month value amount
+            # insert an if statement to check if the month has value
+            # if the month has value I sum the amount to a vatiable tot
+            invoices = Invoice.objects.filter(client=client.piva, 
+                                date_payment__year=year,
+                                date_payment__month=month)
+            for invoice in invoices:
+                client_list2[client.company] = str(invoice.amount_invoice)
+        else:
+            invoices = Invoice.objects.filter(client=client.piva, 
+                                date_payment__year=year,
+                                date_payment__month=month)
+            for invoice in invoices:
+                client_list2[client.name + ' ' + client.last_name] = str(invoice.amount_invoice)
+
+    sell_for_month = {
         'cliente1': [{'gen': 100,
                     'feb': 200,
                     'mar': 150,
                     'apr': 300,
+                    'mag': 230,
                     'giu': 100,
                     'lug': 50,
                     'ago': 20,
                     'set': 150,
                     'ott': 200,
-                    'dic': 400}],
+                    'nov': 70,
+                    'dic': 400,
+                    'tot': 1970}],
         'cliente2': [{'gen': 80,
                     'feb': 230,
                     'mar': 120,
                     'apr': 230,
+                    'mag': 260,
                     'giu': 50,
                     'lug': 0,
                     'ago': 40,
                     'set': 60,
                     'ott': 120,
-                    'dic': 250}],
+                    'nov': 160,
+                    'dic': 250,
+                    'tot': 1600}],
         'cliente3': [{'gen': 10,
                     'feb': 20,
                     'mar': 15,
                     'apr': 30,
+                    'mag': 20,
                     'giu': 10,
                     'lug': 5,
                     'ago': 2,
                     'set': 10,
                     'ott': 20,
-                    'dic': 40}]
+                    'nov': 30,
+                    'dic': 40,
+                    'tot': 202}]
     }
     return render(request, 'cashflow/dashboard.html', {'piva_u' : piva_u,
                                                         'user_r' : user_r,
-                                                        'tot_gennaio' : tot_gennaio,
-                                                        'vendite' : vendite_per_mese})
+                                                        'clients' : client_list2,
+                                                        'sells' : sell_for_month,
+                                                        })
 
 @login_required
 def edit(request):
