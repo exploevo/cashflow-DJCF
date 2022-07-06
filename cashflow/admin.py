@@ -5,14 +5,14 @@ from .models import Client, Supplier, Invoice, XMLUpload, Profile
 @admin.register(Client)
 class ClientAdmin(admin.ModelAdmin):
     list_display = ['piva', 'company', 'name', 'last_name']
-    list_filter = ['piva', 'company', 'name', 'last_name']
+    list_filter = ['company', 'name', 'last_name']
     search_fields = ['piva', 'company', 'name', 'last_name']
     ordering = ['company', 'name', 'last_name']
 
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
     list_display = ['piva', 'company', 'name', 'last_name']
-    list_filter = ['piva', 'company', 'name', 'last_name']
+    list_filter = ['company', 'name', 'last_name']
     search_fields = ['piva', 'company', 'name', 'last_name']
     ordering = ['company', 'name', 'last_name']
 

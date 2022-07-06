@@ -31,31 +31,51 @@ def dashboard(request):
     #potresti non trovare nessun record perché la partita Iva è inserita errata
     piva_u = Profile.objects.get(user = request.user)
     user_r = request.user
-    clients = Client.objects.filter(user = request.user)
-    client_list = Client.objects.filter(user = request.user).values()
+    clients = Client.objects.filter(user = user_r).exclude(piva = piva_u) #here I want to exclude the user piva from the list of client
+    client_list = Client.objects.filter(user = request.user)
     #invoice_list = Invoice.objects.get(client = clients.piva)
     client_list2 ={}
     for client in clients:
         year = 2022
         month = 0o5 #create a range variable or xrange 
         tot = 0
-        if client.name is '':
+        if client.name == '':
             #create a cicle of each month and create a dict
             # range from 1 to 12 or 0 to 11 where i insert the amount
             # for each month i create a dict key the number of the month value amount
             # insert an if statement to check if the month has value
             # if the month has value I sum the amount to a vatiable tot
-            invoices = Invoice.objects.filter(client=client.piva, 
+            for m in range(1, 13):
+                invoices = Invoice.objects.filter(client=client.piva, 
                                 date_payment__year=year,
-                                date_payment__month=month)
-            for invoice in invoices:
-                client_list2[client.company] = str(invoice.amount_invoice)
+                                date_payment__month=m)
+                if invoices.exists():
+                    for invoice in invoices:
+                        if client_list2:
+                            client_list2[client.company].append(invoice.amount_invoice)
+                        else:
+                            client_list2[client.company] = [str(invoice.amount_invoice)]
+                else:
+                    if client_list2:
+                        client_list2[client.company].append('0')
+                    else:
+                        client_list2[client.company] = ['0']
         else:
-            invoices = Invoice.objects.filter(client=client.piva, 
+            for m in range(1, 13):
+                invoices = Invoice.objects.filter(client=client.piva, 
                                 date_payment__year=year,
-                                date_payment__month=month)
-            for invoice in invoices:
-                client_list2[client.name + ' ' + client.last_name] = str(invoice.amount_invoice)
+                                date_payment__month=m)
+                if invoices.exists():
+                    for invoice in invoices:
+                        if client_list2:
+                            client_list2[client.name + ' ' + client.last_name].append(invoice.amount_invoice)
+                        else:
+                            client_list2[client.name + ' ' + client.last_name] = [str(invoice.amount_invoice)]
+                else:
+                    if client_list2:
+                        client_list2[client.name + ' ' + client.last_name].append('0')
+                    else:
+                        client_list2[client.name + ' ' + client.last_name] = ['0']
 
     sell_for_month = {
         'cliente1': [{'gen': 100,
