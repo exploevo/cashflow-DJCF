@@ -7,15 +7,11 @@
     <div class="row">
         <div class="col">
             <h3>CashFlow Data</h3>
-            <p>{{ clients }}</p>
         </div>
     </div>
     <div class="w-100"></div>
     <div class="row">
         <div class="col-8">
-        TOT Gennaio {{ tot_gennaio }}
-        Invoice - {{ invoices.date_payment }}
-
         <br>
         </div>
     </div>
@@ -45,50 +41,9 @@
                 {% for key, value in clients.items %}
                 <tr>
                 <th scope="row">{{ key }}</th>
-                <td>{{ value }}</td>
-                    
-                </tr>
-                {% endfor %}
-            </tbody>
-          </table>
-        </div>
-    </div>
-    <div class="w-100"><hr></div>
-    <div class="row">
-        <div class="w-100">
-        <h4>Client</h4>
-          <table class="table table-hover">
-            <thead>
-              <tr>
-                <th scope="col">Client</th>
-                <th scope="col">Jan</th>
-                <th scope="col">Feb</th>
-                <th scope="col">Mar</th>
-                <th scope="col">Apr</th>
-                <th scope="col">May</th>
-                <th scope="col">Jun</th>
-                <th scope="col">Jul</th>
-                <th scope="col">Aug</th>
-                <th scope="col">Sep</th>
-                <th scope="col">Oct</th>
-                <th scope="col">Nov</th>
-                <th scope="col">Dec</th>
-                <th scope="col">Tot Cli</th>
-              </tr>
-            </thead>
-            <tbody>
-                {% for key, value in sells.items %}
-                <tr>
-                <th scope="row">{{ key }}</th>
-                    {% for v in value %}
-                        {% for k, va in v.items %}
-                       {% if 'tot' in k %} 
-                        <th scope="row" >{{ va }}</th>
-                        {% else %}
-                        <td>{{ va }}</td>
-                        {% endif%}
-                        {% endfor %}
-                    {% endfor %}
+                {% for val in value %}
+                <td>{{ val }}</td>
+                {% endfor %}   
                 </tr>
                 {% endfor %}
             </tbody>

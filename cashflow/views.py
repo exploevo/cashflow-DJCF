@@ -1,8 +1,7 @@
 
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-# from django.views import generic
-from django.contrib.auth import authenticate, login
+#from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
@@ -31,98 +30,41 @@ def dashboard(request):
     #potresti non trovare nessun record perché la partita Iva è inserita errata
     piva_u = Profile.objects.get(user = request.user)
     user_r = request.user
-    clients = Client.objects.filter(user = user_r).exclude(piva = piva_u) #here I want to exclude the user piva from the list of client
-    client_list = Client.objects.filter(user = request.user)
-    #invoice_list = Invoice.objects.get(client = clients.piva)
-    client_list2 ={}
+    clients = Client.objects.filter(user = user_r).exclude(piva = piva_u.piva)
+    client_list ={}
     for client in clients:
-        year = 2022
-        month = 0o5 #create a range variable or xrange 
+        value = []
+        year = 2022 #I need to let the client pass the year (the default is the present year)
         tot = 0
         if client.name == '':
-            #create a cicle of each month and create a dict
-            # range from 1 to 12 or 0 to 11 where i insert the amount
-            # for each month i create a dict key the number of the month value amount
-            # insert an if statement to check if the month has value
-            # if the month has value I sum the amount to a vatiable tot
+            #this could be made in one function to be reusable
             for m in range(1, 13):
-                invoices = Invoice.objects.filter(client=client.piva, 
-                                date_payment__year=year,
-                                date_payment__month=m)
+                invoices = Invoice.objects.filter(client = client.piva, 
+                                date_payment__year = year,
+                                date_payment__month = m)
                 if invoices.exists():
-                    for invoice in invoices:
-                        if client_list2:
-                            client_list2[client.company].append(invoice.amount_invoice)
-                        else:
-                            client_list2[client.company] = [str(invoice.amount_invoice)]
+                    for invoice in invoices: 
+                        value.append(invoice.amount_invoice)
+                        tot += invoice.amount_invoice
                 else:
-                    if client_list2:
-                        client_list2[client.company].append('0')
-                    else:
-                        client_list2[client.company] = ['0']
+                    value.append('0')
+            value.append(tot)
+            client_list[client.company] = value 
         else:
             for m in range(1, 13):
-                invoices = Invoice.objects.filter(client=client.piva, 
-                                date_payment__year=year,
-                                date_payment__month=m)
+                invoices = Invoice.objects.filter(client = client.piva, 
+                                date_payment__year = year,
+                                date_payment__month = m)
                 if invoices.exists():
                     for invoice in invoices:
-                        if client_list2:
-                            client_list2[client.name + ' ' + client.last_name].append(invoice.amount_invoice)
-                        else:
-                            client_list2[client.name + ' ' + client.last_name] = [str(invoice.amount_invoice)]
+                        value.append(invoice.amount_invoice)
+                        tot += invoice.amount_invoice
                 else:
-                    if client_list2:
-                        client_list2[client.name + ' ' + client.last_name].append('0')
-                    else:
-                        client_list2[client.name + ' ' + client.last_name] = ['0']
+                    value.append('0') 
+            value.append(tot)
+            client_list[client.name + ' ' + client.last_name] = value    
 
-    sell_for_month = {
-        'cliente1': [{'gen': 100,
-                    'feb': 200,
-                    'mar': 150,
-                    'apr': 300,
-                    'mag': 230,
-                    'giu': 100,
-                    'lug': 50,
-                    'ago': 20,
-                    'set': 150,
-                    'ott': 200,
-                    'nov': 70,
-                    'dic': 400,
-                    'tot': 1970}],
-        'cliente2': [{'gen': 80,
-                    'feb': 230,
-                    'mar': 120,
-                    'apr': 230,
-                    'mag': 260,
-                    'giu': 50,
-                    'lug': 0,
-                    'ago': 40,
-                    'set': 60,
-                    'ott': 120,
-                    'nov': 160,
-                    'dic': 250,
-                    'tot': 1600}],
-        'cliente3': [{'gen': 10,
-                    'feb': 20,
-                    'mar': 15,
-                    'apr': 30,
-                    'mag': 20,
-                    'giu': 10,
-                    'lug': 5,
-                    'ago': 2,
-                    'set': 10,
-                    'ott': 20,
-                    'nov': 30,
-                    'dic': 40,
-                    'tot': 202}]
-    }
-    return render(request, 'cashflow/dashboard.html', {'piva_u' : piva_u,
-                                                        'user_r' : user_r,
-                                                        'clients' : client_list2,
-                                                        'sells' : sell_for_month,
-                                                        })
+    return render(request, 'cashflow/dashboard.html', {'clients' : client_list,})
 
 @login_required
 def edit(request):
