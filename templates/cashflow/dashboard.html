@@ -7,6 +7,7 @@
     <div class="row">
         <div class="col">
             <h3>CashFlow Data</h3>
+            {{ years }}
         </div>
     </div>
     <div class="w-100"></div>
@@ -39,12 +40,16 @@
             </thead>
             <tbody>
                 {% for key, value in clients.items %}
-                <tr>
-                <th scope="row">{{ key }}</th>
-                {% for val in value %}
-                <td>{{ val }}</td>
-                {% endfor %}   
-                </tr>
+                  <tr>
+                  <th scope="row">{{ key }}</th>
+                  {% for val in value %}
+                    {% if forloop.counter == 13 %}
+                      <th>{{ val }}</th>
+                    {% else %}
+                      <td>{{ val }}</td>
+                    {% endif %}
+                  {% endfor %}   
+                  </tr>
                 {% endfor %}
             </tbody>
           </table>

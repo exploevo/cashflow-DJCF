@@ -1,20 +1,18 @@
-import xmltodict
-import pandas as pd
-import re
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Client, Supplier, Invoice, XMLUpload
-
 from pathlib import Path
 
-import sys
+import xmltodict
+import pandas as pd
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.utils import timezone
 #library to work with p7m files
 from OpenSSL import crypto
 from OpenSSL._util import (
 	ffi as _ffi,
 	lib as _lib,
 )
+
+from .models import Client, Supplier, Invoice, XMLUpload
 
 def process_xml_file(file):
     xml_text = Path(file.path).read_text()
@@ -149,3 +147,43 @@ def insert_db(user, client_data, supplier_data, invoice_data, request):
     else:
         pass
         invoice.save()
+
+
+
+def get_client_dashboard_data(clients, year=timezone.now().year):
+    """Create the table for the dashboard."""
+    client_list = {}
+    for client in clients:
+        value = []
+        #this could be made in one function to be reusable
+        for m in range(1, 13):
+            invoices = Invoice.objects.filter(client=client.piva, 
+                                                date_payment__year=year,
+                                                date_payment__month=m)
+            if invoices.exists():
+                for invoice in invoices: 
+                    value.append(invoice.amount_invoice)
+            else:
+                value.append(0)
+        tot = sum(value)
+        if tot is 0:
+            pass
+        else:
+            value.append(tot)
+            if not client.name:
+                client_list[client.company] = value
+            else:
+                client_list[client.name + ' ' + client.last_name] = value 
+    return client_list  
+
+
+
+def get_client_invoice_payment_years(clients):
+    all_payment_years = []
+    for client in clients:
+        invoices = client.invoices.all()
+        for invoice in invoices:
+            all_payment_years.append(invoice.date_payment.year)
+    invoice_year_range = list(set(all_payment_years))  
+    # invoice_year_ragne = set(invoice.payment_date.year for client in clients for invoice in client.invoices.all())
+    return invoice_year_range
