@@ -6,6 +6,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
 #library to work with p7m files
+import subprocess
 from OpenSSL import crypto
 from OpenSSL._util import (
 	ffi as _ffi,
@@ -25,18 +26,24 @@ def process_xml_file(file):
 
 def process_p7m_file(file):
     with open('media/xmlfiles/' + file, 'rb') as f:
-	    p7data = f.read()
-    p7 = crypto.load_pkcs7_data(crypto.FILETYPE_ASN1, p7data)
-    bio_out =crypto._new_mem_buf()
-    res = _lib.PKCS7_verify(p7._pkcs7, _ffi.NULL, _ffi.NULL, _ffi.NULL, bio_out, _lib.PKCS7_NOVERIFY|_lib.PKCS7_NOSIGS)
-    if res == 1:
-        databytes = crypto._bio_to_string(bio_out)
-        obj = xmltodict.parse(databytes)
-        #df = pd.DataFrame(obj)
-        client_data = get_client_from_xml(obj)
-        supplier_data = get_supplier_from_xml(obj)
-        invoice_data = get_invoice_from_xml(obj)
-        return (client_data, supplier_data, invoice_data)
+        p7data = f.read()
+    try:
+        p7 = crypto.load_pkcs7_data(crypto.FILETYPE_ASN1, p7data)
+        bio_out =crypto._new_mem_buf()
+        res = _lib.PKCS7_verify(p7._pkcs7, _ffi.NULL, _ffi.NULL, _ffi.NULL, bio_out, _lib.PKCS7_NOVERIFY|_lib.PKCS7_NOSIGS)
+        if res == 1:
+                databytes = crypto._bio_to_string(bio_out)
+    except:
+        databyte = subprocess.check_output(["openssl", "cms", "-verify", "-in", 'media/xmlfiles/' + file, "-inform",
+                            "der", "-noverify", "-signer", "cert.pem", "-out", "media/xmlfiles/textdata4.xml"]) 
+        databytes = databyte.encode("utf-8").split(b'\x00')
+  
+    obj = xmltodict.parse(databytes)
+    #df = pd.DataFrame(obj)
+    client_data = get_client_from_xml(obj)
+    supplier_data = get_supplier_from_xml(obj)
+    invoice_data = get_invoice_from_xml(obj)
+    return (client_data, supplier_data, invoice_data)
 
 def get_client_from_xml(df):
     try:
@@ -101,6 +108,7 @@ def get_supplier_from_xml(df):
     }
 
 def get_invoice_from_xml(df):
+    print(df)
     try:
         df['p:FatturaElettronica']
         head = 'p:FatturaElettronica'
@@ -148,7 +156,7 @@ def insert_db(user, client_data, supplier_data, invoice_data, request):
         pass
         invoice.save()
 
-
+#Client dashboard 
 
 def get_client_dashboard_data(clients, year=timezone.now().year):
     """Create the table for the dashboard."""
@@ -166,7 +174,7 @@ def get_client_dashboard_data(clients, year=timezone.now().year):
             else:
                 value.append(0)
         tot = sum(value)
-        if tot is 0:
+        if tot == 0:
             pass
         else:
             value.append(tot)
@@ -175,8 +183,6 @@ def get_client_dashboard_data(clients, year=timezone.now().year):
             else:
                 client_list[client.name + ' ' + client.last_name] = value 
     return client_list  
-
-
 
 def get_client_invoice_payment_years(clients):
     all_payment_years = []

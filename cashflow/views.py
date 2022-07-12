@@ -1,7 +1,6 @@
 
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-#from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
@@ -32,7 +31,7 @@ def dashboard(request):
     #piva_u = Profile.objects.get(user = request.user)
     piva = request.user.profile.piva
     clients = Client.objects.filter(user=request.user).exclude(piva=piva)
-    year = request.GET.get('year')
+    year = request.GET.get('year') #?year=2020
     if not year:
         year = timezone.now().year
     client_list = get_client_dashboard_data(clients, int(year))
@@ -55,8 +54,6 @@ def edit(request):
             user_form.save()
             profile_form.save()
             messages.success(request, "Data Successfully Updated!")
-        #I would like to reload the page in order to see the image
-        # Also the piva must be ad obliged field in order to be a valid user    
     else:
         user_form = UserEditForm(instance = request.user)
         profile_form = ProfileEditForm(instance = request.user.profile)
@@ -79,8 +76,6 @@ def register(request):
             new_user.save()
             profile_form = pform.save(commit = False)
             #create the user profile
-            #Profile.objects.create(user=new_user)
-            messages.success(request, f"{new_user.id}")
             profile_form.user = new_user
             profile_form.save()
             messages.success(request, "Profile Successfully Created!")
