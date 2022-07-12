@@ -29,7 +29,8 @@ class Client(models.Model):
     name = models.CharField(max_length=20, blank=True)
     last_name = models.CharField(max_length=20, blank=True)
     #ForeingKey
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='clients')  # user.clients
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return f'{self.company} {self.name} {self.last_name} {self.user}'

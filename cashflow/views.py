@@ -1,13 +1,13 @@
 
 from django.contrib.auth.models import User
 from django.shortcuts import render, redirect
-#from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils import timezone
 
 from .models import Client, Supplier, Invoice, XMLUpload, Profile
 from .forms import XMLForm, UserRegistrationForm, UserEditForm, ProfileEditForm
-from .utils import process_xml_file, process_p7m_file, insert_db
+from .utils import get_client_invoice_payment_years, process_xml_file, process_p7m_file, insert_db, get_client_dashboard_data
 
 def index(request):
     """View function for home page of site."""
@@ -28,43 +28,20 @@ def index(request):
 def dashboard(request):
     #inserire un try except per reindirizzare (redirect) su messaggio di contatto.
     #potresti non trovare nessun record perché la partita Iva è inserita errata
-    piva_u = Profile.objects.get(user = request.user)
-    user_r = request.user
-    clients = Client.objects.filter(user = user_r).exclude(piva = piva_u.piva)
-    client_list ={}
-    for client in clients:
-        value = []
-        year = 2022 #I need to let the client pass the year (the default is the present year)
-        tot = 0
-        if client.name == '':
-            #this could be made in one function to be reusable
-            for m in range(1, 13):
-                invoices = Invoice.objects.filter(client = client.piva, 
-                                date_payment__year = year,
-                                date_payment__month = m)
-                if invoices.exists():
-                    for invoice in invoices: 
-                        value.append(invoice.amount_invoice)
-                        tot += invoice.amount_invoice
-                else:
-                    value.append('0')
-            value.append(tot)
-            client_list[client.company] = value 
-        else:
-            for m in range(1, 13):
-                invoices = Invoice.objects.filter(client = client.piva, 
-                                date_payment__year = year,
-                                date_payment__month = m)
-                if invoices.exists():
-                    for invoice in invoices:
-                        value.append(invoice.amount_invoice)
-                        tot += invoice.amount_invoice
-                else:
-                    value.append('0') 
-            value.append(tot)
-            client_list[client.name + ' ' + client.last_name] = value    
-
-    return render(request, 'cashflow/dashboard.html', {'clients' : client_list,})
+    #piva_u = Profile.objects.get(user = request.user)
+    piva = request.user.profile.piva
+    clients = Client.objects.filter(user=request.user).exclude(piva=piva)
+    year = request.GET.get('year') #?year=2020
+    if not year:
+        year = timezone.now().year
+    client_list = get_client_dashboard_data(clients, int(year))
+    years = get_client_invoice_payment_years(clients)
+    print(years)
+    context = {
+        'clients': client_list,
+        'years': years,
+    }
+    return render(request, 'cashflow/dashboard.html', context)
 
 @login_required
 def edit(request):
@@ -77,8 +54,6 @@ def edit(request):
             user_form.save()
             profile_form.save()
             messages.success(request, "Data Successfully Updated!")
-        #I would like to reload the page in order to see the image
-        # Also the piva must be ad obliged field in order to be a valid user    
     else:
         user_form = UserEditForm(instance = request.user)
         profile_form = ProfileEditForm(instance = request.user.profile)
@@ -101,8 +76,6 @@ def register(request):
             new_user.save()
             profile_form = pform.save(commit = False)
             #create the user profile
-            #Profile.objects.create(user=new_user)
-            messages.success(request, f"{new_user.id}")
             profile_form.user = new_user
             profile_form.save()
             messages.success(request, "Profile Successfully Created!")
