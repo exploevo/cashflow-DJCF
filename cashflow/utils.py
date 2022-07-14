@@ -15,14 +15,19 @@ from OpenSSL._util import (
 
 from .models import Client, Supplier, Invoice, XMLUpload
 
-def process_xml_file(file):
-    xml_text = Path(file.path).read_text()
-    obj = xmltodict.parse(xml_text)
-    df = pd.DataFrame(obj)
-    client_data = get_client_from_xml(df)
-    supplier_data = get_supplier_from_xml(df)
-    invoice_data = get_invoice_from_xml(df)
-    return (client_data, supplier_data, invoice_data)
+def process_xml_file(file, request):
+    try:
+        xml_text = Path(file.path).read_text()
+        obj = xmltodict.parse(xml_text)
+        df = pd.DataFrame(obj)
+        client_data = get_client_from_xml(df)
+        supplier_data = get_supplier_from_xml(df)
+        invoice_data = get_invoice_from_xml(df)
+        return (client_data, supplier_data, invoice_data)
+    #this must stop the upload if the file is an incorect xml
+    except UnicodeDecodeError:
+        messages.error(request, f"File {file.name} is NOT a correct File you must upload an XML file")
+        return redirect('add_xml_file')
 
 def process_p7m_file(file):
     with open('media/xmlfiles/' + file, 'rb') as f:
@@ -140,14 +145,14 @@ def get_invoice_from_xml(df):
     }
 
 def insert_db(user, client_data, supplier_data, invoice_data, request):
-    messages.info(request, 'CLIENT: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**client_data))
+    #messages.info(request, 'CLIENT: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**client_data))
     client = Client(**client_data, user=user)
-    messages.info(request, 'SUPPLIER: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**supplier_data))
+    #messages.info(request, 'SUPPLIER: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**supplier_data))
     supplier = Supplier(**supplier_data, user=user)
     #Save client and supplier to the DB
     client.save()
     supplier.save()
-    messages.info(request, "INVOICE: {payment_cond}, {payment_mod}, {date_invoice}, {payment_days}, {date_payment}, {amount_invoice}, {client}, {supplier}".format(**invoice_data, client=client, supplier=supplier))
+    #messages.info(request, "INVOICE: {payment_cond}, {payment_mod}, {date_invoice}, {payment_days}, {date_payment}, {amount_invoice}, {client}, {supplier}".format(**invoice_data, client=client, supplier=supplier))
     invoice = Invoice(**invoice_data, client=client, supplier=supplier)
     #Save the data 
     if Invoice.objects.filter(doc_num=invoice.doc_num).exists():
