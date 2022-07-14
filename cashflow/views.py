@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
+import xmltodict
 
 from .models import Client, Supplier, Invoice, XMLUpload, Profile
 from .forms import XMLForm, UserRegistrationForm, UserEditForm, ProfileEditForm
@@ -100,17 +101,28 @@ def add_xml_file(request):
                 if file.name.split(".")[-1] == 'xml':
                     if XMLUpload.objects.filter(name=file.name).exists():
                         messages.warning(request, f"File {file.name} already exist")
+#I need a control that the client or the supplier has the piva of the user
+# otherwise I'm uploadin invoice of another user
+#message the invoice does not contain the piva of the user error!
                     else:
                         xml_upload = XMLUpload(name=file.name, file=file)
                         xml_upload.uploaded_by = request.user
-                        xml_upload.save()
-                        messages.success(request, f"New file uploaded: {file.name}")
-                        client_data, supplier_data, invoice_data = process_xml_file(xml_upload.file)
-                        user = request.user
-                        insert_db(user,client_data, supplier_data, invoice_data, request)
-
+                        try: 
+                            obj = xmltodict.parse(file)
+                            print(obj)
+                            xml_upload.save()
+                            messages.success(request, f"New file uploaded: {file.name}")
+                            client_data, supplier_data, invoice_data = process_xml_file(xml_upload.file, request)
+                            user = request.user
+                            insert_db(user,client_data, supplier_data, invoice_data, request)
+                        except:
+                            messages.error(request, f"File {file.name} is NOT a correct File you must upload an XML file")
+                            return redirect('add_xml_file')
+                
                 elif file.name.split(".")[-1] == 'p7m':
-                    if XMLUpload.objects.filter(name=file.name).exists():
+                    messages.error(request, f"File {file.name} is NOT a correct File you must upload an XML file")
+                    return redirect('add_xml_file')
+                    '''if XMLUpload.objects.filter(name=file.name).exists():
                         messages.warning(request, f"File {file.name} already exist")
                     else:
                         xml_upload = XMLUpload(name=file.name, file=file)
@@ -119,7 +131,7 @@ def add_xml_file(request):
                         messages.success(request, f"New file uploaded: {file.name}")
                         client_data, supplier_data, invoice_data = process_p7m_file(file.name)
                         user = request.user
-                        insert_db(user,client_data, supplier_data, invoice_data, request)
+                        insert_db(user,client_data, supplier_data, invoice_data, request)'''
                 else:
                     messages.error(request, f"<h2>{file.name} Is not a valid File stopped! </h2>")
                     return redirect('cashflow-index')
