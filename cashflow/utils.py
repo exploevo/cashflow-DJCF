@@ -15,19 +15,13 @@ from OpenSSL._util import (
 
 from .models import Client, Supplier, Invoice, XMLUpload
 
-def process_xml_file(file, request):
-    try:
-        xml_text = Path(file.path).read_text()
-        obj = xmltodict.parse(xml_text)
-        df = pd.DataFrame(obj)
-        client_data = get_client_from_xml(df)
-        supplier_data = get_supplier_from_xml(df)
-        invoice_data = get_invoice_from_xml(df)
-        return (client_data, supplier_data, invoice_data)
-    #this must stop the upload if the file is an incorect xml
-    except UnicodeDecodeError:
-        messages.error(request, f"File {file.name} is NOT a correct File you must upload an XML file")
-        return redirect('add_xml_file')
+def process_xml_file(file):
+    obj = xmltodict.parse(file)
+    client_data = get_client_from_xml(obj)
+    supplier_data = get_supplier_from_xml(obj)
+    invoice_data = get_invoice_from_xml(obj)
+    return (client_data, supplier_data, invoice_data)
+
 
 def process_p7m_file(file):
     with open('media/xmlfiles/' + file, 'rb') as f:
@@ -51,6 +45,7 @@ def process_p7m_file(file):
     return (client_data, supplier_data, invoice_data)
 
 def get_client_from_xml(df):
+
     try:
         df['p:FatturaElettronica']
         head = 'p:FatturaElettronica'
@@ -58,7 +53,10 @@ def get_client_from_xml(df):
         all_keys = list(df)
         head = all_keys[0]
 
-    iva = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+    try:
+        iva = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+    except:
+        iva = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['CodiceFiscale']
     try:
         fis = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['CodiceFiscale']
     except KeyError:
@@ -88,8 +86,10 @@ def get_supplier_from_xml(df):
     except KeyError:
         all_keys = list(df)
         head = all_keys[0]
-
-    iva = df[head]['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+    try:
+        iva = df[head]['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['IdFiscaleIVA']['IdCodice']
+    except:
+        iva = df[head]['FatturaElettronicaHeader']['CedentePrestatore']['DatiAnagrafici']['CodiceFiscale']
     try:
         fis = df[head]['FatturaElettronicaHeader']['CessionarioCommittente']['DatiAnagrafici']['CodiceFiscale']
     except KeyError:
@@ -113,7 +113,6 @@ def get_supplier_from_xml(df):
     }
 
 def get_invoice_from_xml(df):
-    print(df)
     try:
         df['p:FatturaElettronica']
         head = 'p:FatturaElettronica'
@@ -122,8 +121,14 @@ def get_invoice_from_xml(df):
         head = all_keys[0]
     
     doc_num = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Numero']
-    payment_cond = df[head]['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento']
-    payment_mod = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento']
+    try:
+        payment_cond = df[head]['FatturaElettronicaBody']['DatiPagamento']['CondizioniPagamento']
+    except KeyError:
+        payment_cond = 'NCON'
+    try:
+        payment_mod = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ModalitaPagamento']
+    except KeyError:
+        payment_mod = 'MP01'
     date_invoice = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data']
     try:
         payment_days = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['GiorniTerminiPagamento']
@@ -132,8 +137,9 @@ def get_invoice_from_xml(df):
     try:
         date_payment = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['DataScadenzaPagamento']
     except KeyError:
-        date_payment = '1900-01-01'
-    amount_invoice = df[head]['FatturaElettronicaBody']['DatiPagamento']['DettaglioPagamento']['ImportoPagamento']
+        date_payment = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data']
+    
+    amount_invoice = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['ImportoTotaleDocumento']
     return {  
         'doc_num': doc_num,
         'payment_cond': payment_cond,
@@ -168,26 +174,59 @@ def get_client_dashboard_data(clients, year=timezone.now().year):
     client_list = {}
     for client in clients:
         value = []
+        tot_month = 0
         #this could be made in one function to be reusable
         for m in range(1, 13):
             invoices = Invoice.objects.filter(client=client.piva, 
                                                 date_payment__year=year,
                                                 date_payment__month=m)
             if invoices.exists():
-                for invoice in invoices: 
-                    value.append(invoice.amount_invoice)
+                #for imvoice of the same month must sum the import 
+                #and create a single value
+                for invoice in invoices:
+                    tot_month += invoice.amount_invoice
+                value.append(round(tot_month ,2))
             else:
                 value.append(0)
         tot = sum(value)
         if tot == 0:
             pass
         else:
-            value.append(tot)
+            value.append(round(tot, 2))
             if not client.name:
                 client_list[client.company] = value
             else:
                 client_list[client.name + ' ' + client.last_name] = value 
     return client_list  
+
+def get_supplier_dashboard_data(suppliers, year=timezone.now().year):
+    supplier_list = {}
+    for supplier in suppliers:
+        value = []
+        tot_month = 0
+        #this could be made in one function to be reusable
+        for m in range(1, 13):
+            invoices = Invoice.objects.filter(supplier=supplier.piva, 
+                                                date_payment__year=year,
+                                                date_payment__month=m)
+            if invoices.exists():
+                #for imvoice of the same month must sum the import 
+                #and create a single value
+                for invoice in invoices:
+                    tot_month += invoice.amount_invoice
+                value.append(round(tot_month ,2))
+            else:
+                value.append(0)
+        tot = sum(value)
+        if tot == 0:
+            pass
+        else:
+            value.append(round(tot, 2))
+            if not supplier.name:
+                supplier_list[supplier.company] = value
+            else:
+                supplier_list[supplier.name + ' ' + supplier.last_name] = value 
+    return supplier_list
 
 def get_client_invoice_payment_years(clients):
     all_payment_years = []
@@ -198,3 +237,4 @@ def get_client_invoice_payment_years(clients):
     invoice_year_range = list(set(all_payment_years))  
     # invoice_year_ragne = set(invoice.payment_date.year for client in clients for invoice in client.invoices.all())
     return invoice_year_range
+
