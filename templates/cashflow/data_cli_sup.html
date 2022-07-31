@@ -1,0 +1,210 @@
+{% extends 'index_CFD.html' %}
+{% load static %}
+
+{% block title %}Data Cient Supplier{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>DataTables</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="{% url 'index_work' %}">Home</a></li>
+              <li class="breadcrumb-item active">DataTables</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Clients</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <button class="btn btn-info btn-sm dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Years
+                </button>
+                <div class="dropdown-menu">
+                  {% for year in years%}
+                    <a class="dropdown-item" href="/index_work/datacs/?year={{year}}">{{ year }}</a>
+                  {% endfor %}
+                </div>
+                <table id="clients" class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col">Client</th>
+                      <th scope="col">Jan</th>
+                      <th scope="col">Feb</th>
+                      <th scope="col">Mar</th>
+                      <th scope="col">Apr</th>
+                      <th scope="col">May</th>
+                      <th scope="col">Jun</th>
+                      <th scope="col">Jul</th>
+                      <th scope="col">Aug</th>
+                      <th scope="col">Sep</th>
+                      <th scope="col">Oct</th>
+                      <th scope="col">Nov</th>
+                      <th scope="col">Dec</th>
+                      <th scope="col">Tot</th>
+                    </tr>
+                  </thead>
+                  <tbody> 
+                  {% for key, value in clients.items %}
+                  <tr>
+                  <th scope="row"><a href="{% url 'list_invoices'%}?piva={{ value.0.0 }}&cs=c">{{ key }}</a></th>
+                    {% for val in value.1 %}
+                      {% if forloop.counter == 13 %}
+                        <th>{{ val }}</th>
+                      {% else %}
+                        <td>{{ val }}</td>
+                      {% endif %}
+                    {% endfor %}   
+                  </tr>
+                  {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th scope="col">Client</th>
+                      <th scope="col">Jan</th>
+                      <th scope="col">Feb</th>
+                      <th scope="col">Mar</th>
+                      <th scope="col">Apr</th>
+                      <th scope="col">May</th>
+                      <th scope="col">Jun</th>
+                      <th scope="col">Jul</th>
+                      <th scope="col">Aug</th>
+                      <th scope="col">Sep</th>
+                      <th scope="col">Oct</th>
+                      <th scope="col">Nov</th>
+                      <th scope="col">Dec</th>
+                      <th scope="col">Tot</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Suppliers</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="suppliers" class="table table-bordered table-hover">
+                  <thead>
+                    <tr>
+                      <th scope="col">Suppliers</th>
+                      <th scope="col">Jan</th>
+                      <th scope="col">Feb</th>
+                      <th scope="col">Mar</th>
+                      <th scope="col">Apr</th>
+                      <th scope="col">May</th>
+                      <th scope="col">Jun</th>
+                      <th scope="col">Jul</th>
+                      <th scope="col">Aug</th>
+                      <th scope="col">Sep</th>
+                      <th scope="col">Oct</th>
+                      <th scope="col">Nov</th>
+                      <th scope="col">Dec</th>
+                      <th scope="col">Tot</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for key, value in suppliers.items %}
+                      <tr>
+                        <th scope="row">{{ key }}</th>
+                        {% for val in value %}
+                          {% if forloop.counter == 13 %}
+                            <th>{{ val }}</th>
+                          {% else %}
+                            <td>{{ val }}</td>
+                          {% endif %}
+                        {% endfor %}   
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <th scope="col">Client</th>
+                      <th scope="col">Jan</th>
+                      <th scope="col">Feb</th>
+                      <th scope="col">Mar</th>
+                      <th scope="col">Apr</th>
+                      <th scope="col">May</th>
+                      <th scope="col">Jun</th>
+                      <th scope="col">Jul</th>
+                      <th scope="col">Aug</th>
+                      <th scope="col">Sep</th>
+                      <th scope="col">Oct</th>
+                      <th scope="col">Nov</th>
+                      <th scope="col">Dec</th>
+                      <th scope="col">Tot</th>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+            <!-- /.card -->
+{% endblock %}
+
+{% block scripts %}
+ 
+<!-- DataTables  & Plugins -->
+<script src="{% static 'plugins/datatables/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-bs4/js/dataTables.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-responsive/js/responsive.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/dataTables.buttons.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.bootstrap4.min.js' %}"></script>
+<script src="{% static 'plugins/jszip/jszip.min.js' %}"></script>
+<script src="{% static 'plugins/pdfmake/pdfmake.min.js' %}"></script>
+<script src="{% static 'plugins/pdfmake/vfs_fonts.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.html5.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.print.min.js' %}"></script>
+<script src="{% static 'plugins/datatables-buttons/js/buttons.colVis.min.js' %}"></script>
+<script>
+  $(function () {
+    $("#example1").DataTable({
+      "responsive": true, "lengthChange": false, "autoWidth": false,
+      "buttons": ["copy", "csv", "excel", "pdf", "print", "colvis"]
+    }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+    $('#clients').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
+    $('#suppliers').DataTable({
+      "paging": true,
+      "lengthChange": false,
+      "searching": false,
+      "ordering": true,
+      "info": true,
+      "autoWidth": false,
+      "responsive": true,
+    });
+  });
+</script>
+{% endblock %}

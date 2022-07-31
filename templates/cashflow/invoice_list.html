@@ -1,0 +1,91 @@
+{% extends 'index_CFD.html' %}
+{% load static %}
+
+{% block title %}Invoice List{% endblock %}
+{% block content %}
+<section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1>Invoide List</h1>
+        </div>
+        <div class="col-sm-6">
+          <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="{% url 'index_work' %}">Home</a></li>
+            <li class="breadcrumb-item active"><a href="{% url 'data_cli_sup' %}">DataTables</a></li>
+            <li class="breadcrumb-item active">Invoice List</li>
+          </ol>
+        </div>
+      </div>
+    </div><!-- /.container-fluid -->
+  </section>
+
+  <!-- Main content -->
+  <section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+                {{ cli_name.client__company }}
+                {% if cli_name.client__company|length %}
+                    <h3 class="card-title">{{cli_name.client__company}}</h3>
+                {% else %}
+                    <h3 class="card-title">{{cli_name.client__name}} {{cli_name.client__last_name}}</h3>
+                {% endif %} 
+                {% for client in cli_name %}
+                {% if forloop.counter == 1 %}
+                    {% if client.client__company|length %}
+                    <h3 class="card-title">{{client.client__company}}</h3>
+                    {% else %}
+                    <h3 class="card-title">{{client.client__name}} {{client.client__last_name}}</h3>
+                    {% endif %}
+                {% endif %} 
+                {% endfor%}
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body">
+              <form method="POST" class="post-form">
+                <table id="clients" class="table table-bordered table-hover">
+                <thead>
+                  <tr>
+                    <th scope="col">Doc Number</th>
+                    <th scope="col">Payment Mod</th>
+                    <th scope="col">Date Invoice</th>
+                    <th scope="col">Date Payment</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Payment</th>
+                  </tr>
+                </thead>
+                <tbody> 
+                        {% csrf_token %}
+                        {{ formset.management_form }}
+                        {% for form in formset %}
+                        <tr>
+                            <td>{{ form.instance.doc_num }}<a href="{% url 'invoice_view' form.instance.id  %}"><i class="fa-solid fa-file-invoice fa-2x float-right"></i></a></td>
+                            <td>{{ form.instance.payment_mod }}</td>
+                            <td>{{ form.instance.date_invoice }}</td>
+                            {% for field in form %}
+                                <td>{{ field }}</td>
+                            {% endfor%}
+                            <td><a class="btn btn-danger" href="{% url 'invoice_delete' form.instance.id %}">Delete</a></td>
+
+                        </tr>
+                        <button type="submit" class="btn btn-outline-success">Save</button>
+                        {% endfor %}
+              </table>
+            </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</section>
+
+{% endblock%}
+{% block scripts %}
+<script>
+
+</script>
+{% endblock %}

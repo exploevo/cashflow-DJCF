@@ -1,12 +1,17 @@
-{% extends "base.html" %}
+{% extends 'registration/log_base.html' %}
 {% block title %}Account Created{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col">
-    <h1>Welcome {{ new_user.first_name }}!</h1>
-    <p>Your account is successfullt created.
-        Now you can <a href="{% url 'login' %}"">Login</a>
-    </p>
+<div class="card card-default">
+    <div class="register-logo">
+      <b>E</b>Company>
+    </div>
+        <div class="card-body">
+          <div class="col-12">
+            <p class="login-box-msg">Welcome {{ new_user.first_name }}!</p>
+            <p>Your account is successfullt created.
+            Now you can <a href="{% url 'login' %}"">Login</a>
+        </p>
+        </div>
     </div>
 </div>
 {% endblock %}

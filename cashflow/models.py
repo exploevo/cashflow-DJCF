@@ -33,7 +33,7 @@ class Client(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f'{self.company} {self.name} {self.last_name} {self.user}'
+        return f'{self.company} {self.name} {self.last_name}'
 
 class Supplier(models.Model):
     piva = models.CharField(primary_key=True, max_length=11)
@@ -89,7 +89,7 @@ class Invoice(models.Model):
     # ForeignKey are Many to one relationship: Many invoices to one Client / Seller
     client = models.ForeignKey(Client, on_delete=models.CASCADE, related_name='invoices', blank=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='invoices', blank=True)
-    
+    payed = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['date_invoice', 'date_payment']
@@ -109,6 +109,7 @@ class XMLUpload(models.Model):
 
     # Relationships from the model
     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='xml_uploads')
+    invoice = models.OneToOneField(Invoice, on_delete=models.CASCADE, null=True, related_name='xml_upload')
 
     def __str__(self):
         return f'{self.name}, {self.file}'

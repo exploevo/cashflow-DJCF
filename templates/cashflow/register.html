@@ -1,21 +1,26 @@
-{% extends "base.html" %}
+{% extends 'registration/log_base.html' %}
 {% block title %}Create an Account{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col">
-        <div class="form-floating mb-3">
-    <h1>Creare an Accout</h1>
-    <p>Please, sign up using the following form:</p>
-    
-    <form method="post">
-        {% csrf_token %}
-        <table class="table table-hover">
-        {{ user_form }}
-        {{ profile_form }}
-        </table>
-        <p><input type="submit" value="Create my Account" class="btn btn-success"></p>
-    </form>
-        </div>
-    </div>
+<div class="card card-default">
+      <div class="register-logo">
+        <b>E</b>Company>
+      </div>
+          <div class="card-body">
+            <div class="col-12">
+            <p class="login-box-msg">Register a new membership</p>
+          <p>Please, sign up using the following form:</p>   
+            <form method="post">
+                {% csrf_token %}
+                <table class="table table-hover">
+                {{ user_form }}
+                {{ profile_form }}
+                </table>
+                <p><input type="submit" value="Create my Account" class="btn btn-success"></p>
+            </form>
+            <a href="{% url 'login' %}" class="text-center">I already have a membership</a>
+            </div>
+          </div>
+   </div>
+</div>
 </div>
 {% endblock %}

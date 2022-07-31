@@ -1,18 +1,29 @@
-{% extends "base.html" %}
+{% extends 'index_CFD.html' %}
+
 {% block title %}Edit your Account{% endblock %}
 {% block content %}
-<div class="row">
-    <div class="col">
-    <h1>Edit your Acccout</h1>
-    <p>You can edit your account using the following form:</p>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <table class="table table-hover">
-        {{ user_form }}
-        {{ profile_form }}
-        </table>
-        <p><input type="submit" value="Save Changes" class="btn btn-success"></p>
-    </form>
+<section class="content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                <h3 class="card-title">Edit your Acccout</h3>
+                </div>
+                <div class="card-body">
+                    <p>You can edit your account using the following form:</p>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <table class="table table-hover">
+                        {{ user_form }}
+                        {{ profile_form }}
+                        </table>
+                        <p><input type="submit" value="Save Changes" class="btn btn-success"></p>
+                    </form>
+                </div>
+            </div>
+        </div>
+      </div>
     </div>
-</div>
+</section>
 {% endblock %}

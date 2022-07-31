@@ -5,6 +5,7 @@ import pandas as pd
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.utils import timezone
+from django.http import JsonResponse
 #library to work with p7m files
 import subprocess
 from OpenSSL import crypto
@@ -140,6 +141,11 @@ def get_invoice_from_xml(df):
         date_payment = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['Data']
     
     amount_invoice = df[head]['FatturaElettronicaBody']['DatiGenerali']['DatiGeneraliDocumento']['ImportoTotaleDocumento']
+    pay_conf_list = ['MP01','MP02','MP03','MP08','MP09','MP10','MP11','MP12',
+                    'MP13','MP14','MP15','MP19','MP20','MP21','MP22']
+
+    payed = payment_mod in pay_conf_list
+  
     return {  
         'doc_num': doc_num,
         'payment_cond': payment_cond,
@@ -148,24 +154,9 @@ def get_invoice_from_xml(df):
         'payment_days': payment_days, 
         'date_payment': date_payment,
         'amount_invoice': amount_invoice,
+        'payed': payed,
     }
 
-def insert_db(user, client_data, supplier_data, invoice_data, request):
-    #messages.info(request, 'CLIENT: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**client_data))
-    client = Client(**client_data, user=user)
-    #messages.info(request, 'SUPPLIER: {piva}, {cod_fiscale}, {company}, {name}, {last_name}'.format(**supplier_data))
-    supplier = Supplier(**supplier_data, user=user)
-    #Save client and supplier to the DB
-    client.save()
-    supplier.save()
-    #messages.info(request, "INVOICE: {payment_cond}, {payment_mod}, {date_invoice}, {payment_days}, {date_payment}, {amount_invoice}, {client}, {supplier}".format(**invoice_data, client=client, supplier=supplier))
-    invoice = Invoice(**invoice_data, client=client, supplier=supplier)
-    #Save the data 
-    if Invoice.objects.filter(doc_num=invoice.doc_num).exists():
-        messages.warning(request, f"INVOICE number {invoice.doc_num} already exist.")
-    else:
-        pass
-        invoice.save()
 
 #Client dashboard 
 
@@ -174,9 +165,9 @@ def get_client_dashboard_data(clients, year=timezone.now().year):
     client_list = {}
     for client in clients:
         value = []
-        tot_month = 0
         #this could be made in one function to be reusable
         for m in range(1, 13):
+            tot_month = 0
             invoices = Invoice.objects.filter(client=client.piva, 
                                                 date_payment__year=year,
                                                 date_payment__month=m)
@@ -194,18 +185,19 @@ def get_client_dashboard_data(clients, year=timezone.now().year):
         else:
             value.append(round(tot, 2))
             if not client.name:
-                client_list[client.company] = value
+                client_list[client.company] = [client.piva], value
             else:
-                client_list[client.name + ' ' + client.last_name] = value 
-    return client_list  
+                client_list[client.name + ' ' + client.last_name] = [client.piva], value 
+    return client_list
 
 def get_supplier_dashboard_data(suppliers, year=timezone.now().year):
     supplier_list = {}
     for supplier in suppliers:
         value = []
-        tot_month = 0
+        
         #this could be made in one function to be reusable
         for m in range(1, 13):
+            tot_month = 0
             invoices = Invoice.objects.filter(supplier=supplier.piva, 
                                                 date_payment__year=year,
                                                 date_payment__month=m)
@@ -228,6 +220,17 @@ def get_supplier_dashboard_data(suppliers, year=timezone.now().year):
                 supplier_list[supplier.name + ' ' + supplier.last_name] = value 
     return supplier_list
 
+def get_client_invoice_list(list_inovices):
+    invoice_list = {}
+    for invoice in list_inovices:
+        value = []
+        value.append(invoice.date_invoice)
+        value.append(invoice.date_payment)
+        value.append(invoice.amount_invoice)
+        value.append(invoice.payed)
+        invoice_list[invoice.client]=value
+        return invoice_list
+
 def get_client_invoice_payment_years(clients):
     all_payment_years = []
     for client in clients:
@@ -237,4 +240,3 @@ def get_client_invoice_payment_years(clients):
     invoice_year_range = list(set(all_payment_years))  
     # invoice_year_ragne = set(invoice.payment_date.year for client in clients for invoice in client.invoices.all())
     return invoice_year_range
-

@@ -1,15 +1,16 @@
 
-from django.contrib.auth.models import User
-from django.shortcuts import render, redirect
+from django.forms import modelformset_factory
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 import xmltodict
-import pandas as pd
 
-from .models import Client, Supplier, Invoice, XMLUpload, Profile
-from .forms import XMLForm, UserRegistrationForm, UserEditForm, ProfileEditForm
-from .utils import get_client_invoice_payment_years, process_xml_file, insert_db, get_client_dashboard_data, get_supplier_dashboard_data
+from .models import Client, Supplier, Invoice, XMLUpload
+from .forms import  XMLForm, UserRegistrationForm, UserEditForm, ProfileEditForm, InvoiceFormSetM
+from .utils import get_client_invoice_payment_years, process_xml_file, get_client_dashboard_data, get_supplier_dashboard_data, get_client_invoice_list
+
 
 def index(request):
     """View function for home page of site."""
@@ -107,9 +108,6 @@ def add_xml_file(request):
                         messages.warning(request, f"File {file.name} already exist")
                         #return redirect('add_xml_file')
                     else:
-#I need a control that the client or the supplier has the piva of the user
-# otherwise I'm uploadin invoice of another user
-#message the invoice does not contain the piva of the user error!
                         xml_upload = XMLUpload(name=file.name, file=file)
                         xml_upload.uploaded_by = request.user
                         # Check if xml file content is correct, if not, send error.
@@ -127,7 +125,17 @@ def add_xml_file(request):
                             messages.success(request, f"New file uploaded: {file.name}")
                             client_data, supplier_data, invoice_data = process_xml_file(xml_upload.file)
                             user = request.user
-                            insert_db(user, client_data, supplier_data, invoice_data, request)
+                            client = Client(**client_data, user=user)
+                            client.save()
+                            supplier = Supplier(**supplier_data, user=user)
+                            supplier.save()
+                            invoice = Invoice(**invoice_data, client=client, supplier=supplier)
+                            if not Invoice.objects.filter(doc_num=invoice.doc_num).exists():
+                                invoice.save()
+                                xml_upload.invoice = invoice
+                                xml_upload.save()
+                            else:
+                                messages.warning(request, f"INVOICE number {invoice.doc_num} already exist.")
                         else:
                             error_message = f'File {file.name} is not an invoice of the logged in user.'
                             messages.error(request, error_message)
@@ -136,21 +144,11 @@ def add_xml_file(request):
                 elif file.name.split(".")[-1] == 'p7m':
                     messages.error(request, f"File {file.name} is NOT a correct File you must upload an XML file")
                     return redirect('add_xml_file')
-                    '''if XMLUpload.objects.filter(name=file.name).exists():
-                        messages.warning(request, f"File {file.name} already exist")
-                    else:
-                        xml_upload = XMLUpload(name=file.name, file=file)
-                        xml_upload.uploaded_by = request.user
-                        xml_upload.save()
-                        messages.success(request, f"New file uploaded: {file.name}")
-                        client_data, supplier_data, invoice_data = process_p7m_file(file.name)
-                        user = request.user
-                        insert_db(user,client_data, supplier_data, invoice_data, request)'''
                 else:
                     messages.error(request, f"<h2>{file.name} Is not a valid File stopped! </h2>")
-                    return redirect('cashflow-index')
+                    return redirect('add_xml_file')
 
-        return redirect('dashboard')
+        return redirect('add_xml_file')
     else:
         form = XMLForm()
 
@@ -159,14 +157,85 @@ def add_xml_file(request):
 
 
 
+def dash3(request):
+    return render(request, 'index3.html')
 
+@login_required
+def index_work(request):
+    return render(request, 'content_CFD.html')
 
+@login_required
+def data_cli_sup(request):
+    #inserire un try except per reindirizzare (redirect) su messaggio di contatto.
+    #potresti non trovare nessun record perché la partita Iva è inserita errata
+    #piva_u = Profile.objects.get(user = request.user)
+    piva = request.user.profile.piva
+    clients = Client.objects.filter(user=request.user).exclude(piva=piva)
+    supplier = Supplier.objects.filter(user=request.user).exclude(piva=piva)
+    year = request.GET.get('year') #?year=2020
+    if not year:
+        year = timezone.now().year
+    client_list = get_client_dashboard_data(clients, int(year))
+    supplier_list = get_supplier_dashboard_data(supplier, int(year))
+    years = get_client_invoice_payment_years(clients)
+    #Insert Years for suppliers
+    #Divide the list of clients form the list of suppliers in the side menu
+    #print(years)
+    context = {
+        'clients': client_list,
+        'suppliers': supplier_list,
+        'years': years,
+    }
+    return render(request, 'cashflow/data_cli_sup.html', context)
 
-
-
-
+@login_required
+def list_invoces(request):
+    piva = request.GET.get('piva')
+    cli_sup = request.GET.get('cs')
+    if cli_sup == 'c':
+        queryset = Invoice.objects.filter(client=piva)
+    elif cli_sup == 's':
+        queryset = Invoice.objects.filter(supplier=piva)
+    else:
+        messages.error(request, f"<h2>Some Error Occur in retrive the List </h2>")
+        return redirect('cashflow/invoice_list.html')
+    InvoiceFormSet = modelformset_factory(Invoice, form=InvoiceFormSetM, max_num=0)
+    if request.method == "POST":
+        formset = InvoiceFormSet(
+            request.POST,
+            queryset=queryset,
+        )
+        if formset.is_valid():
+            formset.save()
+            messages.success(request, "Data Successfully Updated!")
+    else: 
+        formset = InvoiceFormSet(queryset=queryset)
+    context = {
+        'formset': formset,
+        'cli_name': Invoice.objects.filter(client=piva).order_by('date_invoice').values(
+            'id','client__company', 'client__name','client__last_name', 'payment_mod'),
+        
+    }
+    #print(context['cli_name'])
+    return render(request, 'cashflow/invoice_list.html', context)
 
 def counter(request):
     text = request.POST['text']
     number = len(text.split())
     return render(request, 'cashflow/counter.html', {'number': number})
+
+
+def invoice_delete(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    invoice.xml_upload.file.delete()
+    invoice.delete()
+    messages.success(request, "Invoice Successfully Deleted!")
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+
+def invoice_view(request, invoice_id):
+    invoice = get_object_or_404(XMLUpload, invoice=invoice_id)
+    obj = xmltodict.parse(invoice.file)
+    #print(obj)
+
+    #messages.success(request, "Invoice Successfully Deleted!")
+    return render(request, 'cashflow/view_invoice.html', {'invoice': obj})

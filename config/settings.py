@@ -143,8 +143,8 @@ MESSAGE_TAGS = {
  }
 
  #LOGIN PARAMETERS
-LOGIN_REDIRECT_URL = "dashboard"
-LOGOUT_REDIRECT_URL = "dashboard"
+LOGIN_REDIRECT_URL = "index_work"
+LOGOUT_REDIRECT_URL = "index_work"
 LOGIN_URL = 'login'
 LOGOUT_URL = 'logout'
 
